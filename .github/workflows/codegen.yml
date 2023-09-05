@@ -12,7 +12,8 @@ jobs:
   codegen:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v3
 
       - name: Setup Python
         uses: actions/setup-python@v4
@@ -25,7 +26,8 @@ jobs:
       - name: Codegen - Vector
         run: cmd /c "cd codegen && python vector_codegen.py"
 
-      - run: copy "codegen\output\*" "src\gdmath"
+      - name: Copy outputs to src
+        run: copy "codegen\output\*" "src\gdmath"
 
       - name: Validate
         run: pip install .
