@@ -353,6 +353,10 @@ def process_overloads(file: str) -> str:
 def step_generate(template_file: str, output_file: str, params: dict = None, _globals: dict = None):
     print("########## Generate ##########")
 
+    import os
+    if not os.path.exists("output"):
+        os.mkdir("output")
+
     with open(f"output/{output_file}", "w") as output:
         template = open(f"templates/{template_file}").read()
         t = time.perf_counter()
