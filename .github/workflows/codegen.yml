@@ -22,12 +22,8 @@ jobs:
       - name: Install Dependencies
         run: pip install -r requirements.txt
 
-      - run: cd codegen
-
       - name: Codegen - Vector
-        run: python vector_codegen.py
-
-      - run: cd ..
+        run: cmd /c "cd codegen && python vector_codegen.py"
 
       - run: copy "codegen\output\*" "src\gdmath"
 
