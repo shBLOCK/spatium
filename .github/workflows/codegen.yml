@@ -17,12 +17,12 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
-          python-version: ${{ matrix.python }}
+          python-version: 3.11
 
       - name: Codegen - Vector
         run: python codegen/vector_codegen.py
 
-      - run: copy codegen\output\* src\gdmath
+      - run: copy "codegen\output\*" "src\gdmath"
 
       - name: Validate
         run: pip install .
