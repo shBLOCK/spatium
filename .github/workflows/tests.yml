@@ -52,7 +52,7 @@ jobs:
 
       - name: Unzip
         run: |
-          if [[ "${{ steps.determine-os.outputs.os }}" == "ubuntu" ]]; then
+          if [[ "${{ steps.determine-os.outputs.os }}" == "linux" ]]; then
             unzip codegen_results.zip -d src/gdmath
           elif [[ "${{ steps.determine-os.outputs.os }}" == "macos" ]]; then
             unzip codegen_results.zip -d src/gdmath
@@ -62,9 +62,6 @@ jobs:
             echo "Unsupported OS"
             exit 1
           fi
-
-      - name: Test Download
-        run: dir src\gdmath
 
       - name: Setup Python
         uses: actions/setup-python@v4
