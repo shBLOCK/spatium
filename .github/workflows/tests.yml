@@ -1,0 +1,49 @@
+name: Tests
+
+on:
+  workflow_run:
+    workflows: [Codegen]
+    types: [completed]
+
+jobs:
+  tests:
+    runs-on: ${{ matrix.platform }}
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    strategy:
+      fail-fast: true
+      matrix:
+#        python: ["3.3", "3.4", "3.5", "3.6", "3.7", "3.8", "3.9", "3.10", "3.11"]
+        python: ["3.11"]
+#        platform: ["windows-latest", "ubuntu-latest", "macos-latest"]
+        platform: ["windows-latest"]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          sparse-checkout: |
+            codegen
+            tests
+
+      - name: Download Codegen Output
+        uses: actions/download-artifact@v3
+        with:
+          name: codegen_results
+          path: src/gdmath/
+
+      - name: Test Download
+        run: dir src\gdmath
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python }}
+
+      - name: Install Dependencies
+        run: pip install -r requirements.txt
+
+      - name: Build
+        run: pip install .
+
+      - name: Test
+        run: pytest tests
