@@ -48,11 +48,11 @@ jobs:
 
       - name: Unzip
         run: |
-          if [[ "${{ runner.os }}" == "linux" ]]; then
+          if [[ "${{ runner.os }}" == "Linux" ]]; then
             unzip codegen_results.zip -d src/gdmath
-          elif [[ "${{ runner.os }}" == "macos" ]]; then
+          elif [[ "${{ runner.os }}" == "Macos" ]]; then
             unzip codegen_results.zip -d src/gdmath
-          elif [[ "${{ runner.os }}" == "windows" ]]; then
+          elif [[ "${{ runner.os }}" == "Windows" ]]; then
             7z x codegen_results.zip -osrc/gdmath
           else
             echo "Unsupported OS"
