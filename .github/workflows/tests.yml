@@ -46,6 +46,10 @@ jobs:
             let fs = require('fs');
             fs.writeFileSync(`${process.env.GITHUB_WORKSPACE}/codegen_results.zip`, Buffer.from(download.data));
 
+      - name: Determine OS
+        id: determine-os
+        run: echo "::set-output name=os::$(echo ${{ runner.os }} | tr '[:upper:]' '[:lower:]')"
+
       - name: Unzip
         run: |
           if [[ "${{ steps.determine-os.outputs.os }}" == "ubuntu" ]]; then
