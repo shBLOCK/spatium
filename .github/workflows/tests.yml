@@ -15,7 +15,7 @@ jobs:
 #        python: ["3.3", "3.4", "3.5", "3.6", "3.7", "3.8", "3.9", "3.10", "3.11"]
         python: ["3.11"]
 #        platform: ["windows-latest", "ubuntu-latest", "macos-latest"]
-        platform: ["windows-latest"]
+        platform: ["ubuntu-latest"]
 
     steps:
       - name: Checkout
@@ -26,10 +26,28 @@ jobs:
             tests
 
       - name: Download Codegen Output
-        uses: actions/download-artifact@v3
-        with:
-          name: codegen_results
-          path: src/gdmath/
+        uses: actions/github-script@v6
+          with:
+            script: |
+              let allArtifacts = await github.rest.actions.listWorkflowRunArtifacts({
+                 owner: context.repo.owner,
+                 repo: context.repo.repo,
+                 run_id: context.payload.workflow_run.id,
+              });
+              let matchArtifact = allArtifacts.data.artifacts.filter((artifact) => {
+                return artifact.name == "codegen_results"
+              })[0];
+              let download = await github.rest.actions.downloadArtifact({
+                 owner: context.repo.owner,
+                 repo: context.repo.repo,
+                 artifact_id: matchArtifact.id,
+                 archive_format: 'zip',
+              });
+              let fs = require('fs');
+              fs.writeFileSync(`${process.env.GITHUB_WORKSPACE}/codegen_results.zip`, Buffer.from(download.data));
+
+      - name: Unzip
+        run: unzip codegen_results.zip src/gdmath
 
       - name: Test Download
         run: dir src\gdmath
