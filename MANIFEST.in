@@ -1,0 +1,4 @@
+include src/gdmath/*.pyd
+include src/gdmath/*.so
+recursive-exclude tests *
+recursive-exclude codegen *

@@ -1,0 +1,29 @@
+[build-system]
+build-backend = "setuptools.build_meta"
+requires = ["setuptools", "cython"]
+
+[project]
+name = "gdmath"
+version = "1.0"
+description = "GdMath: a fast math library for game development"
+readme = "README.md"
+requires-python = ">=3.8"
+license = {file = "LICENSE.txt"}
+authors = [{name = "shBLOCK", email = "sh@shblock.xyz"}]
+keywords = ["vector", "gamedev", "linear algebra", "math library", "game development"]
+classifiers = [
+    "Programming Language :: Cython",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "License :: OSI Approved :: MIT License",
+    "Intended Audience :: Developers",
+    "Topic :: Scientific/Engineering :: Mathematics",
+    "Topic :: Software Development :: Libraries",
+]
+
+[project.urls]
+"Documentation" = "https://github.com/shBLOCK/GdMath/wiki"
+"Source" = "https://github.com/shBLOCK/GdMath"
+"Issue Tracker" = "https://github.com/shBLOCK/GdMath/issues"

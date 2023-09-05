@@ -1,0 +1,9 @@
+/venv/
+/.pytest_cache/
+/build/
+/dist/
+/gdmath.egg-info/
+/src/gdmath/*.c
+/src/gdmath/*.pyd
+/src/gdmath/vector.pyx
+/codegen/output/*
