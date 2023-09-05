@@ -47,7 +47,17 @@ jobs:
             fs.writeFileSync(`${process.env.GITHUB_WORKSPACE}/codegen_results.zip`, Buffer.from(download.data));
 
       - name: Unzip
-        run: unzip codegen_results.zip src/gdmath
+        run: |
+          if [[ "${{ steps.determine-os.outputs.os }}" == "ubuntu" ]]; then
+            unzip codegen_results.zip -d src/gdmath
+          elif [[ "${{ steps.determine-os.outputs.os }}" == "macos" ]]; then
+            unzip codegen_results.zip -d src/gdmath
+          elif [[ "${{ steps.determine-os.outputs.os }}" == "windows" ]]; then
+            7z x codegen_results.zip -osrc/gdmath
+          else
+            echo "Unsupported OS"
+            exit 1
+          fi
 
       - name: Test Download
         run: dir src\gdmath
