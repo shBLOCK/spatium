@@ -18,5 +18,6 @@ Every swizzle pattern and constructor are implemented as individual methods and 
 As a result, code generation is required so that I don't have to maintain 50,000+ lines of code by hand...   
 Besides, it also has the convenience that vector classes of every dimension and type (e.g. Vec2 Vec3 Vec2i Vec3i) are generated from the same template, so a lot of repetitive code is avoided.
 
-## Acknowledgements
-This library is inspired by [Godot](https://godotengine.org/)'s math library. (pun intended)
+## Notes
+- This library was initially inspired by [Godot](https://godotengine.org/)'s math library. (pun intended)   
+- FYI, when I was coding this, I didn't know about `Cython.Tempita` until it's too late. It'd probably be a lot easier if I knew it from the beginning and don't have to write as much codegen by myself... But I'd still need to do things like overloading by myself anyway, so it's not a big deal.
