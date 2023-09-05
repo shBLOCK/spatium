@@ -1,0 +1,34 @@
+name: Codegen
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  codegen:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python }}
+
+      - name: Codegen - Vector
+        run: python codegen/vector_codegen.py
+
+      - run: copy codegen\output\* src\gdmath
+
+      - name: Validate
+        run: pip install .
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: codegen_results
+          path: codegen/output/
