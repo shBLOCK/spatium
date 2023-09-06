@@ -10,7 +10,7 @@ jobs:
     runs-on: ${{ matrix.platform }}
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     strategy:
-      fail-fast: false #TODO: temporary, remove after testing
+      fail-fast: true
       matrix:
         python: ["3.7", "3.8", "3.9", "3.10", "3.11"]
         platform: ["windows-latest", "ubuntu-latest", "macos-latest"]
