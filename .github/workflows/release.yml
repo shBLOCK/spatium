@@ -3,7 +3,10 @@ name: Release
 on:
   push:
     branches: [master]
-    tags: [v.*]
+    tags: ["v.*"]
+
+env:
+  GH_TOKEN: ${{ github.token }}
 
 jobs:
   prepare:
