@@ -26,7 +26,7 @@ jobs:
             tests
 
       - name: Listdir
-        run: dir src/gdmath
+        run: tree
 
       - name: Download Codegen Output
         uses: actions/github-script@v6
@@ -63,13 +63,13 @@ jobs:
 #          fi
 
       - name: Listdir
-        run: dir src/gdmath
+        run: tree
 
       - name: Unzip
         run: 7z x codegen_results.zip -osrc/gdmath
 
       - name: Listdir
-        run: dir src/gdmath
+        run: tree
 
       - name: Setup Python
         uses: actions/setup-python@v4
@@ -77,19 +77,19 @@ jobs:
           python-version: ${{ matrix.python }}
 
       - name: Listdir
-        run: dir src/gdmath
+        run: tree
 
       - name: Install Dependencies
         run: pip install -r requirements.txt
 
       - name: Listdir
-        run: dir src/gdmath
+        run: tree
 
       - name: Build
         run: pip install -e .
 
       - name: Listdir
-        run: dir src/gdmath
+        run: tree
 
       - name: Upload Built Package
         uses: actions/upload-artifact@v3
@@ -98,7 +98,7 @@ jobs:
           retention-days: 1
 
       - name: Listdir
-        run: dir src/gdmath
+        run: tree
 
       - name: Test
         run: pytest tests
