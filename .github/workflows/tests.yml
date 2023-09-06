@@ -20,13 +20,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-        with:
-          sparse-checkout: |
-            codegen
-            tests
-
-      - name: Listdir
-        run: tree /F /A
 
       - name: Download Codegen Output
         uses: actions/github-script@v6
@@ -62,43 +55,25 @@ jobs:
 #            exit 1
 #          fi
 
-      - name: Listdir
-        run: tree /F /A
-
       - name: Unzip
         run: 7z x codegen_results.zip -osrc/gdmath
-
-      - name: Listdir
-        run: tree /F /A
 
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python }}
 
-      - name: Listdir
-        run: tree /F /A
-
       - name: Install Dependencies
         run: pip install -r requirements.txt
 
-      - name: Listdir
-        run: tree /F /A
-
       - name: Build
         run: pip install -e .
-
-      - name: Listdir
-        run: tree /F /A
 
       - name: Upload Built Package
         uses: actions/upload-artifact@v3
         with:
           path: src/gdmath
           retention-days: 1
-
-      - name: Listdir
-        run: tree /F /A
 
       - name: Test
         run: pytest tests
