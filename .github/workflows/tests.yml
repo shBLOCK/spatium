@@ -12,8 +12,8 @@ jobs:
     strategy:
       fail-fast: false #TODO: temporary, remove after testing
       matrix:
-#        python: ["3.3", "3.4", "3.5", "3.6", "3.7", "3.8", "3.9", "3.10", "3.11"]
-        python: ["3.11"]
+        python: ["3.3", "3.4", "3.5", "3.6", "3.7", "3.8", "3.9", "3.10", "3.11"]
+#        python: ["3.11"]
         platform: ["windows-latest", "ubuntu-latest", "macos-latest"]
 #        platform: ["ubuntu-latest"]
 
@@ -42,19 +42,6 @@ jobs:
             let fs = require('fs');
             fs.writeFileSync(`${process.env.GITHUB_WORKSPACE}/codegen_results.zip`, Buffer.from(download.data));
 
-#      - name: Unzip
-#        run: |
-#          if [[ "${{ runner.os }}" == "Linux" ]]; then
-#            unzip codegen_results.zip -d src/gdmath
-#          elif [[ "${{ runner.os }}" == "Macos" ]]; then
-#            unzip codegen_results.zip -d src/gdmath
-#          elif [[ "${{ runner.os }}" == "Windows" ]]; then
-#            7z x codegen_results.zip -osrc/gdmath
-#          else
-#            echo "Unsupported OS"
-#            exit 1
-#          fi
-
       - name: Unzip
         run: 7z x codegen_results.zip -osrc/gdmath
 
@@ -69,11 +56,5 @@ jobs:
       - name: Build
         run: pip install .
 
-      - name: Upload Built Package
-        uses: actions/upload-artifact@v3
-        with:
-          path: src/gdmath
-          retention-days: 1
-
-      - name: Test
+      - name: Run Tests
         run: pytest tests
