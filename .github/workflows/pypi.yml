@@ -1,0 +1,24 @@
+name: PyPI
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+
+jobs:
+  pypi:
+    runs-on: windows-latest
+    steps:
+      - name: Download Assets
+        run: |
+          mkdir dists
+          gh release download ${{ github.ref_name }} --dir ./dists
+
+      - name: Upload
+        uses: pypa/gh-action-pypi-publish@release/v1.8.10
+        with:
+          packages-dir: dists/
+          repository-url: https://test.pypi.org/
+          password: ${{ secrets.TESTPYPI_TOKEN }}

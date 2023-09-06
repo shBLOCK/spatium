@@ -1,0 +1,107 @@
+name: Release
+
+on:
+  push:
+    branches: [master]
+    tags: [v.*]
+
+jobs:
+  prepare:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.11
+
+      - name: Install Dependencies
+        run: pip install -r requirements.txt
+
+      - name: Codegen - Vector
+        run: python vector_codegen.py
+        working-directory: codegen
+
+      - name: Copy outputs to src
+        run: copy "codegen\output\*" "src\gdmath"
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: codegen_results
+          path: codegen/output/
+          retention-days: 1
+
+      - name: Create Release
+        run: gh release create ${{ github.ref_name }} --verify-tag --generate-notes --draft
+
+  source_dists:
+    runs-on: windows-latest
+    needs: prepare
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Download Codegen Output
+        uses: actions/download-artifact@v3
+        with:
+          name: codegen_results
+          path: src/gdmath
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.11
+
+      - name: Install Dependencies
+        run: pip install -r requirements.txt
+
+      - name: Build
+        run: python setup.py sdist --formats=gztar,zip
+
+      - name: Upload
+        run: gh release upload ${{ github.ref_name }} "./dist/*"
+
+  binary_dists:
+    runs-on: ${{ matrix.os }}
+    needs: prepare
+    strategy:
+      fail-fast: true
+      matrix:
+        python: [ "3.7", "3.8", "3.9", "3.10", "3.11" ]
+        platform: [ "windows-latest", "ubuntu-latest", "macos-latest" ]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Download Codegen Output
+        uses: actions/download-artifact@v3
+        with:
+          name: codegen_results
+          path: src/gdmath
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.11
+
+      - name: Install Dependencies
+        run: pip install -r requirements.txt
+
+      - name: Build
+        run: python setup.py bdist_wheel
+
+      - name: Build (build twice to include .c files)
+        run: python setup.py bdist_wheel
+
+      - name: Upload
+        run: gh release upload ${{ github.ref_name }} "./dist/*"
+
+#  final_publish:
+#    runs-on: ubuntu-latest
+#    needs: [source_dists, binary_dists]
+#    steps:
+#      - name: Publish
+#        run: gh release edit ${{ github.ref_name }} --draft=false
