@@ -66,10 +66,7 @@ jobs:
         run: python setup.py sdist --formats=gztar,zip
 
       - name: Upload
-        run: |
-          for file in ./dist/*; do
-            gh release upload ${{ github.ref_name }} "$file"
-          done
+        run: gh release upload ${{ github.ref_name }} ./dist/*
 
   binary_dists:
     runs-on: ${{ matrix.os }}
@@ -104,10 +101,7 @@ jobs:
         run: python setup.py bdist_wheel
 
       - name: Upload
-        run: |
-          for file in ./dist/*; do
-            gh release upload ${{ github.ref_name }} "$file"
-          done
+        run: gh release upload ${{ github.ref_name }} ./dist/*
 
 #  final_publish:
 #    runs-on: ubuntu-latest
