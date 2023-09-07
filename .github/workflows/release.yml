@@ -3,7 +3,7 @@ name: Release
 on:
   push:
     tags:
-      - 'v*'
+      - 'v.*'
 
 env:
   GH_TOKEN: ${{ github.token }}
