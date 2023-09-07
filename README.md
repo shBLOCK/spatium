@@ -3,8 +3,6 @@
 [![Codegen](https://github.com/shBLOCK/GdMath/actions/workflows/codegen.yml/badge.svg)](https://github.com/shBLOCK/GdMath/actions/workflows/codegen.yml)
 [![Tests](https://github.com/shBLOCK/GdMath/actions/workflows/tests.yml/badge.svg)](https://github.com/shBLOCK/GdMath/actions/workflows/tests.yml)
 [![Release](https://github.com/shBLOCK/GdMath/actions/workflows/release.yml/badge.svg)](https://github.com/shBLOCK/GdMath/actions/workflows/release.yml)
-[![PyPI](https://github.com/shBLOCK/GdMath/actions/workflows/pypi.yml/badge.svg)](https://github.com/shBLOCK/GdMath/actions/workflows/pypi.yml)
-
 
 ## Main features
 - 100% Cython implementation (~30x speedup from pure python on average)
