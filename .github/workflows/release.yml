@@ -5,7 +5,7 @@ on:
     branches:
       - master
     tags:
-      - v.*
+      - 'v.*'
 
 env:
   GH_TOKEN: ${{ github.token }}
