@@ -113,9 +113,9 @@ jobs:
             gh release upload "${{ github.ref_name }}" "$($file.FullName)"
           }
 
-#  final_publish:
-#    runs-on: ubuntu-latest
-#    needs: [source_dists, binary_dists]
-#    steps:
-#      - name: Publish
-#        run: gh release edit ${{ github.ref_name }} --draft=false
+  final_publish:
+    runs-on: ubuntu-latest
+    needs: [source_dists, binary_dists]
+    steps:
+      - name: Publish
+        run: gh release edit ${{ github.ref_name }} --draft=false
