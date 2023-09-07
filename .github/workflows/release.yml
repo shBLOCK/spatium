@@ -138,6 +138,8 @@ jobs:
   pypi_publish:
     runs-on: ubuntu-latest
     needs: final_publish
+    permissions:
+      id-token: write
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -154,4 +156,3 @@ jobs:
         uses: pypa/gh-action-pypi-publish@v1.8.10
         with:
           repository-url: https://test.pypi.org/legacy/
-          password: ${{ secrets.TESTPYPI_TOKEN }}
