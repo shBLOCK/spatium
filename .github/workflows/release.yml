@@ -7,6 +7,8 @@ on:
 env:
   GH_TOKEN: ${{ github.token }}
 
+permissions: write-all
+
 jobs:
   prepare:
     runs-on: windows-latest
