@@ -6,7 +6,6 @@ on:
 
 env:
   GH_TOKEN: ${{ github.token }}
-  separator: ${{ if eq(runner.os, 'Windows') }}\${{ else }}/${{ endif }}
 
 permissions: write-all
 
@@ -67,7 +66,7 @@ jobs:
         run: python setup.py sdist --formats=gztar,zip
 
       - name: Upload
-        run: gh release upload ${{ github.ref_name }} "${{ github.workspace }}${{ separator }}dist${{ separator }}*"
+        run: gh release upload ${{ github.ref_name }} "${{ github.workspace }}${{ runner.os == 'Windows' && '\' || '/' }}dist${{ runner.os == 'Windows' && '\' || '/' }}*"
 
   binary_dists:
     runs-on: ${{ matrix.os }}
@@ -102,7 +101,7 @@ jobs:
         run: python setup.py bdist_wheel
 
       - name: Upload
-        run: gh release upload ${{ github.ref_name }} "${{ github.workspace }}${{ separator }}dist${{ separator }}*"
+        run: gh release upload ${{ github.ref_name }} "${{ github.workspace }}${{ runner.os == 'Windows' && '\' || '/' }}dist${{ runner.os == 'Windows' && '\' || '/' }}*"
 
 #  final_publish:
 #    runs-on: ubuntu-latest
