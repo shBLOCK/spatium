@@ -96,7 +96,9 @@ jobs:
           python-version: 3.11
 
       - name: Install Dependencies
-        run: pip install -r requirements.txt
+        run: |
+          pip install -r requirements.txt
+          pip install wheel
 
       - name: Build
         run: python setup.py bdist_wheel
