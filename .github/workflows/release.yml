@@ -69,7 +69,7 @@ jobs:
         shell: pwsh
         run: |
           foreach ($file in (Get-ChildItem dist/*)) {
-            gh release upload ${{ github.ref_name }} $file.FullName
+            gh release upload "${{ github.ref_name }}" "$($file.FullName)"
           }
 
   binary_dists:
@@ -108,7 +108,7 @@ jobs:
         shell: pwsh
         run: |
           foreach ($file in (Get-ChildItem dist/*)) {
-            gh release upload ${{ github.ref_name }} $file.FullName
+            gh release upload "${{ github.ref_name }}" "$($file.FullName)"
           }
 
 #  final_publish:
