@@ -17,7 +17,7 @@ jobs:
           gh release download ${{ github.ref_name }} --dir ./dists
 
       - name: Upload
-        uses: pypa/gh-action-pypi-publish@release/v1.8.10
+        uses: pypa/gh-action-pypi-publish@v1.8.10
         with:
           packages-dir: dists/
           repository-url: https://test.pypi.org/
