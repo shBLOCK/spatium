@@ -144,7 +144,8 @@ jobs:
 
       - run: mkdir dist
 
-      - uses: actions/download-artifact@v3
+      - name: Download Artifacts
+        uses: actions/download-artifact@v3
         with:
           name: dists
           path: dist
@@ -152,5 +153,5 @@ jobs:
       - name: Upload
         uses: pypa/gh-action-pypi-publish@v1.8.10
         with:
-          repository-url: https://test.pypi.org/
+          repository-url: https://test.pypi.org/legacy/
           password: ${{ secrets.TESTPYPI_TOKEN }}
