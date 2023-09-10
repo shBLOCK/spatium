@@ -14,7 +14,7 @@ jobs:
     runs-on: windows-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup Python
         uses: actions/setup-python@v4
@@ -46,7 +46,7 @@ jobs:
     needs: prepare
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Download Codegen Output
         uses: actions/download-artifact@v3
@@ -84,11 +84,10 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        python: [ "3.7", "3.8", "3.9", "3.10", "3.11" ]
         platform: [ "windows-latest", "ubuntu-latest", "macos-latest" ]
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Download Codegen Output
         uses: actions/download-artifact@v3
@@ -99,25 +98,31 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
-          python-version: ${{ matrix.python }}
+          python-version: 3.11
 
       - name: Install Dependencies
         run: |
           pip install -r requirements.txt
-          pip install wheel
+          pip install cibuildwheel==2.15.0
 
-      - name: Build
-        run: python setup.py bdist_wheel
-
-      - name: Build (build twice to include .c files)
-        run: python setup.py bdist_wheel
-
-      - name: Upload
+      - name: Cythonize
         shell: pwsh
         run: |
-          foreach ($file in (Get-ChildItem dist/*)) {
-            gh release upload "${{ github.ref_name }}" "$($file.FullName)"
+          foreach ($file in (Get-ChildItem src/gdmath/*.pyx)) {
+            cython "$($file.FullName)"
           }
+
+      - name: CIBuildWheel
+        run: |
+          mkdir dist
+          python -m cibuildwheel --output-dir dist
+
+#      - name: Upload
+#        shell: pwsh
+#        run: |
+#          foreach ($file in (Get-ChildItem dist/*)) {
+#            gh release upload "${{ github.ref_name }}" "$($file.FullName)"
+#          }
 
       - name: Upload to Artifacts
         uses: actions/upload-artifact@v3
@@ -130,7 +135,7 @@ jobs:
     needs: [source_dists, binary_dists]
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Publish
         run: gh release edit ${{ github.ref_name }} --draft=false
@@ -142,7 +147,7 @@ jobs:
       id-token: write
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - run: mkdir dist
 

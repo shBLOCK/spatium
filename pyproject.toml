@@ -31,3 +31,18 @@ classifiers = [
 "Documentation" = "https://github.com/shBLOCK/GdMath/wiki"
 "Source" = "https://github.com/shBLOCK/GdMath"
 "Issue Tracker" = "https://github.com/shBLOCK/GdMath/issues"
+
+[tool.cibuildwheel]
+build = [
+    "cp3*-*",
+    "pp3*-*",
+]
+
+[tool.cibuildwheel.windows]
+archs = ["AMD64", "x86"]
+
+[tool.cibuildwheel.linux]
+archs = ["x86_64", "i686"]
+
+[tool.cibuildwheel.macos]
+archs = ["x86_64", "arm64"]
