@@ -150,5 +150,9 @@ jobs:
           name: dists
           path: dist
 
+      - name: Delete redundant sdists
+        shell: pwsh
+        run: rm dist/*.zip
+
       - name: Upload
         uses: pypa/gh-action-pypi-publish@v1.8.10
