@@ -28,6 +28,13 @@ jobs:
         run: python vector_codegen.py
         working-directory: codegen
 
+      - name: Cythonize
+        shell: pwsh
+        run: |
+          foreach ($file in (Get-ChildItem src/gdmath/*.pyx)) {
+            cython "$($file.FullName)"
+          }
+
       - name: Copy outputs to src
         run: copy "codegen\output\*" "src\gdmath"
 
@@ -84,7 +91,8 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        platform: [ "windows-latest", "ubuntu-latest", "macos-latest" ]
+        python: ["cp39", "cp310", "cp311", "cp312", "pp39", "pp310"]
+        platform: ["windows-latest", "ubuntu-latest", "macos-latest"]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -95,29 +103,14 @@ jobs:
           name: codegen_results
           path: src/gdmath
 
-      - name: Setup Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: 3.11
-
-      - name: Install Dependencies
-        run: |
-          pip install -r requirements.txt
-          pip install cibuildwheel==2.15.0
-
-      - name: Cythonize
-        shell: pwsh
-        run: |
-          foreach ($file in (Get-ChildItem src/gdmath/*.pyx)) {
-            cython "$($file.FullName)"
-          }
-
       - name: CIBuildWheel
-        run: |
-          mkdir dist
-          python -m cibuildwheel --output-dir dist
+        uses: pypa/cibuildwheel@v2.15.0
+        with:
+          output-dir: dist
+        env:
+          CIBW_BUILD: "${{ matrix.python }}-*"
 
-#      - name: Upload
+      #      - name: Upload
 #        shell: pwsh
 #        run: |
 #          foreach ($file in (Get-ChildItem dist/*)) {
