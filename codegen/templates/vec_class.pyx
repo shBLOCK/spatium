@@ -32,28 +32,28 @@ cdef class _VecClassName_:
     #<OVERLOAD_DISPATCHER>:__init__
 
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return #<GEN>: gen_repr(_Dims_, _vType_)
 
-    def __eq__(self, object other):
+    def __eq__(self, object other) -> bool:
         if not isinstance(other, _VecClassName_):
             return False
         return #<GEN>: gen_for_each_dim("self.{dim} == other.{dim}", _Dims_, join=" and ")
 
-    def __ne__(self, object other):
+    def __ne__(self, object other) -> bool:
         if not isinstance(other, _VecClassName_):
             return True
         return #<GEN>: gen_for_each_dim("self.{dim} != other.{dim}", _Dims_, join=" or ")
 
-    def __bool__(self):
+    def __bool__(self) -> bool:
         return #<GEN>: gen_for_each_dim("self.{dim} == 0", _Dims_, join=" and ")
 
-    def __pos__(self):
+    def __pos__(self) -> _VecClassName_:
         cdef _VecClassName_ vec = _VecClassName_.__new__(_VecClassName_)
         #<GEN>: gen_for_each_dim("vec.{dim} = self.{dim}", _Dims_)
         return vec
 
-    def __neg__(self):
+    def __neg__(self) -> _VecClassName_:
         cdef _VecClassName_ vec = _VecClassName_.__new__(_VecClassName_)
         #<GEN>: gen_for_each_dim("vec.{dim} = -self.{dim}", _Dims_)
         return vec
@@ -71,7 +71,7 @@ cdef class _VecClassName_:
         return #<GEN>: gen_for_each_dim("self.{dim} * other.{dim}", _Dims_, join=" + ")
     #<IF>: _Dims_ == 3
 
-    def __xor__(self, _VecClassName_ other):
+    def __xor__(self, _VecClassName_ other) -> _VecClassName_:
         """Vector cross product"""
         cdef _VecClassName_ vec = _VecClassName_.__new__(_VecClassName_)
         vec.x = self.y * other.z - self.z * other.y
@@ -81,7 +81,7 @@ cdef class _VecClassName_:
     #<ENDIF>
 
 
-    def __len__(self):
+    def __len__(self) -> int:
         _Dims_ = 0  #<IGNORE>
         return _Dims_
 
@@ -89,11 +89,11 @@ cdef class _VecClassName_:
         #<GEN>: gen_item_op(_Dims_, "return self.{dim}")
         pass  #<IGNORE>
 
-    def __setitem__(self, int key, _vTypeC_ value):
+    def __setitem__(self, int key, _vTypeC_ value) -> None:
         #<GEN>: gen_item_op(_Dims_, "self.{dim} = value")
         pass  #<IGNORE>
 
-    def __iter__(self):
+    def __iter__(self) -> __VecClassName_iterator:
         cdef __VecClassName_iterator iterator = __VecClassName_iterator.__new__(__VecClassName_iterator)
         #<GEN>: gen_for_each_dim("iterator.{dim} = self.{dim}", _Dims_)
         # iterator.vec = self
@@ -152,14 +152,14 @@ cdef class __VecClassName_iterator:
     cdef short index
 
 
-    def __next__(self):
+    def __next__(self) -> _vType_:
         #<GEN>: gen_iterator_next(_Dims_)
         pass  #<IGNORE>
 
-    def __iter__(self):
+    def __iter__(self) -> __VecClassName_iterator:
         return self
 
-    def __length_hint__(self):
+    def __length_hint__(self) -> int:
         _Dims_ = 0  #<IGNORE>
         return _Dims_
 # <TEMPLATE_END>

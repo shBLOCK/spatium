@@ -101,8 +101,8 @@ def _swizzles(dims: int) -> Iterator[str]:
 
 def _gen_swizzle_get(swizzle: str, vtype: Type) -> str:
     out = "@property\n"
-    out += f"def {swizzle}(self):\n"
     vec_cls = get_vec_class_name(len(swizzle), vtype)
+    out += f"def {swizzle}(self) -> {vec_cls}:\n"
     out += f"    cdef {vec_cls} vec = {vec_cls}.__new__({vec_cls})\n"
     for i, swiz in enumerate(swizzle):
         if swiz in DIMS:
@@ -120,7 +120,7 @@ def _gen_swizzle_get(swizzle: str, vtype: Type) -> str:
 
 def _gen_swizzle_set(swizzle: str, vtype: Type):
     out = f"@{swizzle}.setter\n"
-    out += f"def {swizzle}(self, {get_vec_class_name(len(swizzle), vtype)} vec):\n"
+    out += f"def {swizzle}(self, {get_vec_class_name(len(swizzle), vtype)} vec) -> None:\n"
     for i, swiz in enumerate(swizzle):
         assert swiz in DIMS
         out += f"    self.{swiz} = vec.{DIMS[i]}\n"
