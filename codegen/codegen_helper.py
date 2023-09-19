@@ -288,7 +288,7 @@ class _Overload:
                 else:
                     param_strs.append(param)
 
-        lines = [f"def {self.name}({', '.join(param_strs)}, /):"]
+        lines = [f"def {self.name}({', '.join(('object ' if i > 0 else '') + p for i,p in enumerate(param_strs))}, /):"]
         disp_lines = self._gen_dispatch_tree()
         lines += [f"    {dl}" for dl in disp_lines]
         return lines

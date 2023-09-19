@@ -114,20 +114,20 @@ cdef class _VecClassName_:
 
     #<IGNORE_NEXT>
     # noinspection PyTypeChecker
-    def __or__(self, other: _VecClassName_) -> float:
+    def __or__(self, _VecClassName_ other) -> float:
         """Equivalent to distance_to()"""
         #<GEN>: gen_for_each_dim("cdef _vTypeC_ d{dim} = self.{dim} - other.{dim}", _Dims_)
         return #<GEN>: f"sqrt(<double> ({gen_for_each_dim('d{dim} * d{dim}', _Dims_, join=' + ')}))"
 
     #<IGNORE_NEXT>
     # noinspection PyTypeChecker
-    def distance_to(self, other: _VecClassName_) -> float:
+    def distance_to(self, _VecClassName_ other) -> float:
         #<GEN>: gen_for_each_dim("cdef _vTypeC_ d{dim} = self.{dim} - other.{dim}", _Dims_)
         return #<GEN>: f"sqrt(<double> ({gen_for_each_dim('d{dim} * d{dim}', _Dims_, join=' + ')}))"
 
     #<IGNORE_NEXT>
     # noinspection PyTypeChecker
-    def distance_sqr_to(self, other: _VecClassName_) -> float:
+    def distance_sqr_to(self, _VecClassName_ other) -> float:
         #<GEN>: gen_for_each_dim("cdef _vTypeC_ d{dim} = self.{dim} - other.{dim}", _Dims_)
         return #<GEN>: f"<double> ({gen_for_each_dim('d{dim} * d{dim}', _Dims_, join=' + ')})"
     #<IF>: _vType_ is float
