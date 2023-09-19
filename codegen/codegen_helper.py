@@ -350,8 +350,11 @@ def process_overloads(file: str) -> str:
     return "".join(f"{line}\n" for line in lines)
 
 
-def step_generate(template_file: str, output_file: str, params: dict = None, _globals: dict = None):
+def step_generate(template_file: str, output_file: str = None, params: dict = None, _globals: dict = None):
     print("########## Generate ##########")
+
+    if output_file is None:
+        output_file = template_file
 
     import os
     if not os.path.exists("output"):

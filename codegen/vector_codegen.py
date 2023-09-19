@@ -212,7 +212,7 @@ def gen_vec_class(dims: int, vtype: Type) -> str:
 
 if __name__ == '__main__':
     import shutil
-    codegen.step_generate("vector_template.pyx", "vector.pyx", _globals=globals())
+    codegen.step_generate("vector.pyx", _globals=globals())
 
     shutil.copy("output/vector.pyx", "../src/gdmath/vector.pyx")
 
