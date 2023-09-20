@@ -360,10 +360,11 @@ def step_generate(template_file: str, output_file: str = None, params: dict = No
     if not os.path.exists("output"):
         os.mkdir("output")
 
-    with open(f"output/{output_file}", "w") as output:
-        template = open(f"templates/{template_file}").read()
+    with open(f"output/{output_file}", "w", encoding="utf8") as output:
+        template = open(f"templates/{template_file}", encoding="utf8").read()
         t = time.perf_counter()
-        globals().update(_globals)
+        if _globals is not None:
+            globals().update(_globals)
         result = from_template(template, params)
         for i, line in enumerate(result.splitlines(keepends=False)):
             if "<ERR>" in line:
