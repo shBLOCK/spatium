@@ -210,7 +210,7 @@ def gen_vec_class(dims: int, vtype: Type) -> str:
     return cls
 
 
-if __name__ == '__main__':
+def run():
     import shutil
     codegen.step_generate("vector.pyx", _globals=globals())
 
@@ -218,3 +218,7 @@ if __name__ == '__main__':
 
     # codegen.step_cythonize("vector")
     # codegen.step_move_to_dest("../sim/math/", "vector", ".pyd")
+
+
+if __name__ == '__main__':
+    run()
