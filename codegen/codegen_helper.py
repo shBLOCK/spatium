@@ -225,9 +225,8 @@ class _Overload:
             return t.__name__
         assert False
 
-    def _func_from_params(self, params: Sequence) -> _Func | None:
-        assert len(params) == self.max_params
-        match_func = None
+    def _func_from_params(self, params: Sequence) -> Sequence[_Func]:
+        match_funcs = []
         for func in self._funcs:
             for i, param in enumerate(params):
                 if len(func.params) <= i:
@@ -240,10 +239,9 @@ class _Overload:
                     if param != func.params[i]:
                         break
             else:
-                assert match_func is None, f"Multiple matching functions for: {', '.join(str(p) for p in params)}"
-                match_func = func
+                match_funcs.append(func)
 
-        return match_func
+        return match_funcs
 
     def _gen_type_no_match_exception(self, param_types: tuple) -> str:
         text = (f"raise TypeError(\"No matching overload function for parameter types: "
@@ -257,9 +255,12 @@ class _Overload:
         if params is None:
             params = (Self,) if self._funcs[0].params[0] is Self else ()
         if len(params) == self.max_params:
-            func = self._func_from_params(params)
-            if func is None:
+            funcs = self._func_from_params(params)
+            if len(funcs) == 0:
                 return [self._gen_type_no_match_exception(params)], False
+            if len(funcs) > 1:
+                assert False, f"Multiple matching functions for: {', '.join(str(p) for p in params)}"
+            func = funcs[0]
 
             out = [f"{'self.' if self.is_method else ''}"
                    f"{func.name}"
@@ -270,6 +271,9 @@ class _Overload:
                 out[0] = f"return {out[0]}"
             return out, True
         else:
+            if len(self._func_from_params(params)) == 0:
+                return self._gen_type_no_match_exception(params), False
+
             out = []
             possible_types = self.possible_param_types[len(params)]
             any_hit = False
@@ -369,8 +373,8 @@ def process_overloads(file: str) -> str:
     return "".join(f"{line}\n" for line in lines)
 
 
-def step_generate(template_file: str, output_file: str = None, params: dict = None, _globals: dict = None, overload: bool = False):
-    print("########## Generate ##########")
+def step_generate(template_file: str, output_file: str = None, write_file: bool = False, params: dict = None, _globals: dict = None, overload: bool = False):
+    print(f"Step Generate: {template_file}")
 
     if output_file is None:
         output_file = template_file
@@ -379,19 +383,28 @@ def step_generate(template_file: str, output_file: str = None, params: dict = No
     if not os.path.exists("output"):
         os.mkdir("output")
 
-    with open(f"output/{output_file}", "w", encoding="utf8") as output:
-        template = open(f"templates/{template_file}", encoding="utf8").read()
-        t = time.perf_counter()
-        if _globals is not None:
-            globals().update(_globals)
-        result = from_template(template, params)
-        for i, line in enumerate(result.splitlines(keepends=False)):
-            if "<ERR>" in line:
-                raise Exception(f"Unresolved generation error in line: {i+1}\n{line}")
-        if overload:
-            result = process_overloads(result)
-        print(f"Generation completed in {time.perf_counter() - t:.3f}s")
-        output.write(result)
+
+    template = open(f"templates/{template_file}", encoding="utf8").read()
+    t = time.perf_counter()
+    if _globals is not None:
+        old_globals = globals().copy()
+        globals().update(_globals)
+    result = from_template(template, params)
+    if _globals is not None:
+        globals().clear()
+        # noinspection PyUnboundLocalVariable
+        globals().update(old_globals)
+    for i, line in enumerate(result.splitlines(keepends=False)):
+        if "<ERR>" in line:
+            raise Exception(f"Unresolved generation error in line: {i+1}\n{line}")
+    if overload:
+        result = process_overloads(result)
+    print(f"Step Generate: {template_file} completed in {time.perf_counter() - t:.3f}s")
+    if write_file:
+        with open(f"output/{output_file}", "w", encoding="utf8") as output:
+            output.write(result)
+    else:
+        return result
 
 
 def step_cythonize(file: str):
@@ -414,8 +427,6 @@ def step_cythonize(file: str):
 
 
 def step_move_to_dest(final_dest: str, file_prefix: str, file_suffix: str):
-    print("########## Move To Dest ##########")
-
     import os
     import shutil
 
