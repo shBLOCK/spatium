@@ -130,6 +130,10 @@ class _Func:
         match c_ret:
             case None | "" | "void":
                 self.ret = None
+            case "float" | "double":
+                self.ret = float
+            case "int" | "long":
+                self.ret = int
             case _:
                 self.ret = c_ret
 
@@ -241,14 +245,21 @@ class _Overload:
 
         return match_func
 
-    def _gen_dispatch_tree(self, params: tuple = None) -> Sequence[str]:
+    def _gen_type_no_match_exception(self, param_types: tuple) -> str:
+        text = (f"raise TypeError(\"No matching overload function for parameter types: "
+                f"{', '.join(self._type_str(pt) for pt in param_types)}")
+        if len(param_types) != self.max_params:
+            text += ", ..."
+        text += "\")"
+        return text
+
+    def _gen_dispatch_tree(self, params: tuple = None) -> tuple[Sequence[str], bool]:
         if params is None:
             params = (Self,) if self._funcs[0].params[0] is Self else ()
         if len(params) == self.max_params:
             func = self._func_from_params(params)
             if func is None:
-                return [f"raise TypeError(\"No matching overload function for parameter types: "
-                        f"{', '.join(self._type_str(pt) for pt in params)}\")"]
+                return [self._gen_type_no_match_exception(params)], False
 
             out = [f"{'self.' if self.is_method else ''}"
                    f"{func.name}"
@@ -257,24 +268,30 @@ class _Overload:
                 out.append("return")
             else:
                 out[0] = f"return {out[0]}"
-            return out
+            return out, True
         else:
             out = []
             possible_types = self.possible_param_types[len(params)]
+            any_hit = False
             for i, t in enumerate(possible_types):
-
                 out.append(f"{'if' if i == 0 else 'elif'} "
                            f"{self._type_check_expression(t).format(self.param_names[len(params)])}:")
-                dt = self._gen_dispatch_tree(params + (t,))
-                for l in dt:
-                    out.append(f"    {l}")
+                branch_params = params + (t,)
+                dt, hit = self._gen_dispatch_tree(branch_params)
+                if hit:
+                    any_hit = True
+                if hit:
+                    for l in dt:
+                        out.append(f"    {l}")
+                else:
+                    out.append("    " + self._gen_type_no_match_exception(branch_params))
             out.append("else:")
             expected_type_strs = [self._type_str(t) for t in possible_types]
             expected_types_str = " | ".join(expected_type_strs)
             out.append(f"    raise TypeError(f\"The {len(params) + 1}th parameter expected {expected_types_str}, "
                        f"got {{{self.param_names[len(params)]}}}\")")
 
-            return out
+            return out, any_hit
 
     def gen_dispatcher(self) -> Sequence[str]:
         params = self.param_names
@@ -288,8 +305,10 @@ class _Overload:
                 else:
                     param_strs.append(param)
 
-        lines = [f"def {self.name}({', '.join(('object ' if i > 0 else '') + p for i,p in enumerate(param_strs))}, /):"]
-        disp_lines = self._gen_dispatch_tree()
+        ret_types = list(set(_Overload._type_str(f.ret) for f in self._funcs))
+
+        lines = [f"def {self.name}({', '.join(('object ' if i > 0 else '') + p for i,p in enumerate(param_strs))}, /) -> {' | '.join(ret_types)}:"]
+        disp_lines, _ = self._gen_dispatch_tree()
         lines += [f"    {dl}" for dl in disp_lines]
         return lines
 
@@ -317,7 +336,7 @@ def process_overloads(file: str) -> str:
                 r"\)",
                 line
             )
-            assert m is not None
+            assert m is not None, line
             name = m.group("name")
             c_ret = m.group("return")
             c_params = (*m.captures("first_param"), *m.captures("remaining_params"))
@@ -350,7 +369,7 @@ def process_overloads(file: str) -> str:
     return "".join(f"{line}\n" for line in lines)
 
 
-def step_generate(template_file: str, output_file: str = None, params: dict = None, _globals: dict = None):
+def step_generate(template_file: str, output_file: str = None, params: dict = None, _globals: dict = None, overload: bool = False):
     print("########## Generate ##########")
 
     if output_file is None:
@@ -369,6 +388,8 @@ def step_generate(template_file: str, output_file: str = None, params: dict = No
         for i, line in enumerate(result.splitlines(keepends=False)):
             if "<ERR>" in line:
                 raise Exception(f"Unresolved generation error in line: {i+1}\n{line}")
+        if overload:
+            result = process_overloads(result)
         print(f"Generation completed in {time.perf_counter() - t:.3f}s")
         output.write(result)
 
