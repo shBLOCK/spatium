@@ -60,7 +60,7 @@ def test_swizzle():
     assert v3.ylo == Vec3(2, 1, 0)
     assert v4.wzyx == Vec4(4, 3, 2, 1)
 
-def test_pos():
+def test_copy():
     a = Vec3(1, 2, 3)
     b = +a
     b.x = 5
