@@ -5,5 +5,5 @@
 /gdmath.egg-info/
 /src/gdmath/*.c
 /src/gdmath/*.pyd
-/src/gdmath/vector.pyx
+/src/gdmath/_gdmath.pyx
 /codegen/output/*
