@@ -50,6 +50,16 @@ def test_comparison():
     assert (a == b) == False
     assert (a != c) == False
 
+def test_swizzle():
+    v2 = Vec2(1, 2)
+    v3 = Vec3(1, 2, 3)
+    v4 = Vec4(1, 2, 3, 4)
+    assert v2.yx == Vec2(2, 1)
+    assert v2.yxxy == Vec4(2, 1, 1, 2)
+    assert v3.yxzy == Vec4(2, 1, 3, 2)
+    assert v3.ylo == Vec3(2, 1, 0)
+    assert v4.wzyx == Vec4(4, 3, 2, 1)
+
 def test_pos():
     a = Vec3(1, 2, 3)
     b = +a
