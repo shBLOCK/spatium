@@ -212,17 +212,3 @@ def gen_vec_class(dims: int, vtype: Type) -> str:
 
 def get_globals():
     return globals()
-
-
-def run():
-    import shutil
-    codegen.step_generate("vector.pyx", _globals=globals())
-
-    shutil.copy("output/vector.pyx", "../src/gdmath/vector.pyx")
-
-    # codegen.step_cythonize("vector")
-    # codegen.step_move_to_dest("../sim/math/", "vector", ".pyd")
-
-
-if __name__ == '__main__':
-    run()
