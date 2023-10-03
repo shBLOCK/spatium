@@ -202,16 +202,24 @@ class _Overload:
         return tuple(ps)
 
     @staticmethod
-    def _type_check_expression(t):
-        if type(t) is str:
-            return f"isinstance({{}}, {t})"
-        if t is None:
-            return "{} is None"
-        if t is Self:
-            assert False
-        if isinstance(t, type):
-            return f"isinstance({{}}, {t.__name__})"
-        assert False
+    def _type_check_expression(*types):
+        out = ""
+        for i,t in enumerate(types):
+            if type(t) is str:
+                out += f"isinstance({{value}}, {t})"
+            elif t is None:
+                out += "{value} is None"
+            elif t is Self:
+                assert False
+            elif isinstance(t, type):
+                out += f"isinstance({{value}}, {t.__name__})"
+            else:
+                assert False
+
+            if i != len(types) - 1:
+                out += " or "
+
+        return out
 
     @staticmethod
     def _type_str(t):
@@ -276,11 +284,23 @@ class _Overload:
 
             out = []
             possible_types = self.possible_param_types[len(params)]
+            branches = []
+            for t in possible_types:
+                matches = self._func_from_params(params + (t,))
+                if len(matches) == 0:
+                    continue
+                for branch in branches:
+                    if set(matches) == set(self._func_from_params(params + (branch[0],))):
+                        branch.append(t)
+                        break
+                else:
+                    branches.append([t])
+
             any_hit = False
-            for i, t in enumerate(possible_types):
+            for i, t in enumerate(branches):
                 out.append(f"{'if' if i == 0 else 'elif'} "
-                           f"{self._type_check_expression(t).format(self.param_names[len(params)])}:")
-                branch_params = params + (t,)
+                           f"{self._type_check_expression(*t).format(value=self.param_names[len(params)])}:")
+                branch_params = params + (t[0],)
                 dt, hit = self._gen_dispatch_tree(branch_params)
                 if hit:
                     any_hit = True
