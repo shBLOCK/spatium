@@ -8,8 +8,9 @@
       <excludeFolder url="file://$MODULE_DIR$/dist" />
       <excludeFolder url="file://$MODULE_DIR$/gdmath.egg-info" />
       <excludeFolder url="file://$MODULE_DIR$/venv" />
+      <excludeFolder url="file://$MODULE_DIR$/venv_311" />
     </content>
-    <orderEntry type="jdk" jdkName="Python 3.11 (GdMath)" jdkType="Python SDK" />
+    <orderEntry type="jdk" jdkName="Python 3.12 (GdMath)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
 </module>
