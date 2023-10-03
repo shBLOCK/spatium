@@ -15,3 +15,5 @@ if __name__ == '__main__':
         subprocess.call(f"{sys.executable} -m pip uninstall gdmath -y", stdout=sys.stdout)
         print("#"*15 + "pip install -v -v -v .." + "#"*15)
         subprocess.call(f"{sys.executable} -m pip install -v -v -v ..", stdout=sys.stdout, stderr=sys.stdout)
+    else:
+        print("Running in CI platform!")
