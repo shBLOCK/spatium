@@ -24,8 +24,8 @@ jobs:
       - name: Install Dependencies
         run: pip install -r requirements.txt
 
-      - name: Codegen - Vector
-        run: python vector_codegen.py
+      - name: Codegen
+        run: python gen_all.py
         working-directory: codegen
 
       - name: Cythonize
