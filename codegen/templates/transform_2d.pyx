@@ -352,39 +352,4 @@ cdef class Transform2D:
         cdef Transform2D t = self.copy()
         t.scale_ip(scale)
         return t
-
-
-# @cython.freelist(16)
-# @cython.no_gc
-# @cython.final
-# cdef class _T2ScaleProxy:
-#     cdef Transform2D transform
-#
-#     @property
-#     def x(self) -> float:
-#         return self.transform.get_scale_x()
-#
-#     @property
-#     def y(self) -> float:
-#         return self.transform.get_scale_y()
-#
-#     @x.setter
-#     def x(self, float value) -> None:
-#         self.transform.set_scale_x(value)
-#
-#     @y.setter
-#     def y(self, float value) -> None:
-#         self.transform.set_scale_y(value)
-#
-#     @property
-#     def vec(self) -> Vec2:
-#         cdef Vec2 vec = Vec2.__new__(Vec2)
-#         vec.x = self.transform.get_scale_x()
-#         vec.y = self.transform.get_scale_y()
-#         return vec
-#
-#     @vec.setter
-#     def vec(self, Vec2 value) -> None:
-#         self.transform.set_scale_x(value.x)
-#         self.transform.set_scale_y(value.y)
 #<TEMPLATE_END>
