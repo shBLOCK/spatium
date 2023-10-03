@@ -8,7 +8,6 @@ cdef class Vec2:
 from libc.math cimport atan2, sin, cos, sqrt, NAN
 
 
-#TODO: add noexcept
 @cython.auto_pickle(True)
 @cython.freelist(1024)
 @cython.no_gc
@@ -19,17 +18,17 @@ cdef class Transform2D:
     cdef double ox, oy
 
 
-    cdef inline void identity(self):
+    cdef inline void identity(self) noexcept:
         self.xx, self.xy = 1.0, 0.0
         self.yx, self.yy = 0.0, 1.0
         self.ox = self.oy = 0.0
 
     #<OVERLOAD>
-    cdef void __init__(self):
+    cdef void __init__(self) noexcept:
         self.identity()
 
     #<OVERLOAD>
-    cdef void __init__(self, double xx, double xy, double yx, double yy, double ox, double oy):
+    cdef void __init__(self, double xx, double xy, double yx, double yy, double ox, double oy) noexcept:
         self.xx = xx
         self.xy = xy
         self.yx = yx
@@ -38,13 +37,13 @@ cdef class Transform2D:
         self.oy = oy
 
     #<OVERLOAD>
-    cdef void __init__(self, Vec2 x, Vec2 y, Vec2 origin):
+    cdef void __init__(self, Vec2 x, Vec2 y, Vec2 origin) noexcept:
         self.xx, self.xy = x.x, x.y
         self.yx, self.yy = y.x, y.y
         self.ox, self.oy = origin.x, origin.y
 
     #<OVERLOAD>
-    cdef void __init__(self, Transform2D transform):
+    cdef void __init__(self, Transform2D transform) noexcept:
         self.xx = transform.xx
         self.xy = transform.xy
         self.yx = transform.yx
@@ -83,7 +82,7 @@ cdef class Transform2D:
             t.ox, t.oy = origin.x, origin.y
         return t
 
-    cdef inline Transform2D copy(self):
+    cdef inline Transform2D copy(self) noexcept:
         cdef Transform2D t = Transform2D.__new__(Transform2D)
         t.xx = self.xx
         t.xy = self.xy
@@ -187,16 +186,16 @@ cdef class Transform2D:
     def __len__(self) -> int:
         return 3
 
-    cdef inline double tdotx(self, double x, double y):
+    cdef inline double tdotx(self, double x, double y) noexcept:
         return x * self.xx + y * self.yx
 
-    cdef inline double mulx(self, double x, double y):
+    cdef inline double mulx(self, double x, double y) noexcept:
         return self.tdotx(x, y) + self.ox
 
-    cdef inline double tdoty(self, double x, double y):
+    cdef inline double tdoty(self, double x, double y) noexcept:
         return x * self.xy + y * self.yy
 
-    cdef inline double muly(self, double x, double y):
+    cdef inline double muly(self, double x, double y) noexcept:
         return self.tdoty(x, y) + self.oy
 
     def __mul__(self, Vec2 other) -> Vec2:
@@ -206,14 +205,14 @@ cdef class Transform2D:
         return vec
 
     #<OVERLOAD>
-    cdef Vec2 __call__(self, Vec2 other):
+    cdef Vec2 __call__(self, Vec2 other) noexcept:
         cdef Vec2 vec = Vec2.__new__(Vec2)
         vec.x = self.mulx(other.x, other.y)
         vec.y = self.muly(other.x, other.y)
         return vec
 
     #<OVERLOAD>
-    cdef Transform2D __call__(self, Transform2D other):
+    cdef Transform2D __call__(self, Transform2D other) noexcept:
         cdef Transform2D t = Transform2D.__new__(Transform2D)
         t.xx = self.tdotx(other.xx, other.xy)
         t.xy = self.tdoty(other.xx, other.xy)
@@ -243,7 +242,7 @@ cdef class Transform2D:
         self.ox = other.mulx(self.ox, self.oy)
         self.oy = other.muly(self.ox, self.oy)
 
-    cdef inline double _determinant(self):
+    cdef inline double _determinant(self) noexcept:
         return self.xx * self.yy - self.xy * self.yx
 
     @property
@@ -262,10 +261,10 @@ cdef class Transform2D:
         return t
 
 
-    cdef inline double get_rotation(self):
+    cdef inline double get_rotation(self) noexcept:
         return atan2(self.xy, self.xx)
 
-    cdef inline void set_rotation(self, double rotation):
+    cdef inline void set_rotation(self, double rotation) noexcept:
         cdef double scale_x = self.get_scale_x()
         cdef double scale_y = self.get_scale_y()
         cdef double c = cos(rotation)
@@ -277,20 +276,20 @@ cdef class Transform2D:
         self.set_scale_x(scale_x)
         self.set_scale_y(scale_y)
 
-    cdef inline double get_scale_x(self):
+    cdef inline double get_scale_x(self) noexcept:
         return sqrt(self.xx * self.xx + self.xy * self.xy)
 
-    cdef inline double get_scale_y(self):
+    cdef inline double get_scale_y(self) noexcept:
         cdef double det = self._determinant()
         cdef double det_sign = 1.0 if det > 0.0 else -1.0 if det < 0.0 else 0.0 if det == 0.0 else NAN
         return sqrt(self.yx * self.yx + self.yy * self.yy) * det_sign
 
-    cdef inline void set_scale_x(self, double value):
+    cdef inline void set_scale_x(self, double value) noexcept:
         cdef double m = value / sqrt(self.xx * self.xx + self.xy * self.xy)
         self.xx *= m
         self.xy *= m
 
-    cdef inline void set_scale_y(self, double value):
+    cdef inline void set_scale_y(self, double value) noexcept:
         cdef double m = value / sqrt(self.yx * self.yx + self.yy * self.yy)
         self.yx *= m
         self.yy *= m

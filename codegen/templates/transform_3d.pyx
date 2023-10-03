@@ -8,7 +8,6 @@ cdef class Vec3:
 from libc.math cimport sin, cos
 
 
-#TODO: add noexcept
 @cython.auto_pickle(True)
 @cython.freelist(1024)
 @cython.no_gc
@@ -19,18 +18,18 @@ cdef class Transform3D:
     cdef double zx, zy, zz
     cdef double ox, oy, oz
 
-    cdef inline void identity(self):
+    cdef inline void identity(self) noexcept:
         self.xx, self.xy, self.xz = 1.0, 0.0, 0.0
         self.yx, self.yy, self.yz = 0.0, 1.0, 0.0
         self.zx, self.zy, self.zz = 0.0, 0.0, 1.0
         self.ox = self.oy = self.oz = 0.0
 
     #<OVERLOAD>
-    cdef void __init__(self):
+    cdef void __init__(self) noexcept:
         self.identity()
 
     #<OVERLOAD>
-    cdef void __init__(self, double xx, double xy, double xz, double yx, double yy, double yz, double zx, double zy, double zz, double ox, double oy, double oz):
+    cdef void __init__(self, double xx, double xy, double xz, double yx, double yy, double yz, double zx, double zy, double zz, double ox, double oy, double oz) noexcept:
         self.xx = xx
         self.xy = xy
         self.xz = xz
@@ -45,14 +44,14 @@ cdef class Transform3D:
         self.oz = oz
 
     #<OVERLOAD>
-    cdef void __init__(self, Vec3 x, Vec3 y, Vec3 z, Vec3 origin):
+    cdef void __init__(self, Vec3 x, Vec3 y, Vec3 z, Vec3 origin) noexcept:
         self.xx, self.xy, self.xz = x.x, x.y, x.z
         self.yx, self.yy, self.yz = y.x, y.y, y.z
         self.zx, self.zy, self.zz = z.x, z.y, z.z
         self.ox, self.oy, self.oz = origin.x, origin.y, origin.z
 
     #<OVERLOAD>
-    cdef void __init__(self, Transform3D transform):
+    cdef void __init__(self, Transform3D transform) noexcept:
         self.xx = transform.xx
         self.xy = transform.xy
         self.xz = transform.xz
@@ -119,7 +118,7 @@ cdef class Transform3D:
         t.zz = scale.z
         return t
 
-    cdef inline Transform3D copy(self):
+    cdef inline Transform3D copy(self) noexcept:
         cdef Transform3D t = Transform3D.__new__(Transform3D)
         t.xx = self.xx
         t.xy = self.xy
@@ -271,22 +270,22 @@ cdef class Transform3D:
     def __len__(self) -> int:
         return 4
 
-    cdef inline double tdotx(self, double x, double y, double z):
+    cdef inline double tdotx(self, double x, double y, double z) noexcept:
         return x * self.xx + y * self.yx + z * self.zx
 
-    cdef inline double mulx(self, double x, double y, double z):
+    cdef inline double mulx(self, double x, double y, double z) noexcept:
         return self.tdotx(x, y, z) + self.ox
 
-    cdef inline double tdoty(self, double x, double y, double z):
+    cdef inline double tdoty(self, double x, double y, double z) noexcept:
         return x * self.xy + y * self.yy + z * self.zy
 
-    cdef inline double muly(self, double x, double y, double z):
+    cdef inline double muly(self, double x, double y, double z) noexcept:
         return self.tdoty(x, y, z) + self.oy
 
-    cdef inline double tdotz(self, double x, double y, double z):
+    cdef inline double tdotz(self, double x, double y, double z) noexcept:
         return x * self.xz + y * self.yz + z * self.zz
 
-    cdef inline double mulz(self, double x, double y, double z):
+    cdef inline double mulz(self, double x, double y, double z) noexcept:
         return self.tdotz(x, y, z) + self.oz
 
     def __mul__(self, Vec3 other) -> Vec3:
@@ -297,7 +296,7 @@ cdef class Transform3D:
         return vec
 
     #<OVERLOAD>
-    cdef Vec3 __call__(self, Vec3 other):
+    cdef Vec3 __call__(self, Vec3 other) noexcept:
         cdef Vec3 vec = Vec3.__new__(Vec3)
         vec.x = self.mulx(other.x, other.y, other.z)
         vec.y = self.muly(other.x, other.y, other.z)
@@ -305,7 +304,7 @@ cdef class Transform3D:
         return vec
 
     #<OVERLOAD>
-    cdef Transform3D __call__(self, Transform3D other):
+    cdef Transform3D __call__(self, Transform3D other) noexcept:
         cdef Transform3D t = Transform3D.__new__(Transform3D)
         t.xx = self.tdotx(other.xx, other.xy, other.xz)
         t.xy = self.tdoty(other.xx, other.xy, other.xz)
@@ -353,7 +352,7 @@ cdef class Transform3D:
         self.oy = other.muly(self.ox, self.oy, self.oz)
         self.oz = other.mulz(self.ox, self.oy, self.oz)
 
-    cdef inline double _determinant(self):
+    cdef inline double _determinant(self) noexcept:
         return (self.xx * (self.yy * self.zz - self.yz * self.zy) -
                 self.yx * (self.xy * self.zz - self.xz * self.zy) +
                 self.zx * (self.xy * self.yz - self.yy * self.xz))
