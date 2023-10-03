@@ -3,11 +3,15 @@ import vector_codegen
 
 
 if __name__ == '__main__':
-    vector_codegen.run()
-    codegen.step_generate("transform_2d.pyx")
-    # codegen.step_generate("transform_3d.pyx")
+    codegen.step_generate("_gdmath.pyx", write_file=True, _globals=globals())
 
     import os
     if os.getenv("CI") != "true":
-        codegen.step_move_to_dest("../src/gdmath/", "vector", ".pyx")
-        codegen.step_move_to_dest("../src/gdmath/", "transform_2d", ".pyx")
+        codegen.step_move_to_dest("../src/gdmath/", "_gdmath", ".pyx")
+
+        import sys
+        import subprocess
+        print("#"*15 + "pip uninstall gdmath -y" + "#"*15)
+        subprocess.call(f"{sys.executable} -m pip uninstall gdmath -y", stdout=sys.stdout)
+        print("#"*15 + "pip install -v -v -v .." + "#"*15)
+        subprocess.call(f"{sys.executable} -m pip install -v -v -v ..", stdout=sys.stdout, stderr=sys.stdout)

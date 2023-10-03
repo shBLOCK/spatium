@@ -1,7 +1,6 @@
-#<TEMPLATE_BEGIN>
 #<GEN>: from_template(open("templates/directives.pyx").read())
 
-cimport cython
+#<TEMPLATE_BEGIN>
 from libc.math cimport sqrt
 
 
