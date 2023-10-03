@@ -14,7 +14,7 @@ def get_c_type(vtype: Type) -> str:
     if vtype is float:
         return f"double"
     elif vtype is int:
-        return f"int"
+        return f"long"
     else:
         assert False
 
