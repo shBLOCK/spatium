@@ -13,6 +13,10 @@ jobs:
   prepare:
     runs-on: windows-latest
     steps:
+      - name: Validate push
+        if: github.event.commits[1] != null
+        run: echo "::error title=Invalid push::The release push much include only the tagged commit!"
+
       - name: Checkout
         uses: actions/checkout@v4
 
@@ -46,7 +50,7 @@ jobs:
           retention-days: 1
 
       - name: Create Release
-        run: gh release create "${{ github.ref_name }}" --verify-tag --title "${{ github.ref_name }}" --notes "${{ github.ref_name }}" --draft
+        run: gh release create "${{ github.ref_name }}" --verify-tag --title "${{ github.ref_name }}" --notes "${{ github.event.head_commit.message }}" --draft
 
   source_dists:
     runs-on: windows-latest
