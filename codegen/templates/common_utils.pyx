@@ -4,7 +4,7 @@ from libc.math cimport fabs, isfinite
 DEF DEFAULT_RELATIVE_TOLERANCE = 1e-5
 DEF DEFAULT_ABSOLUTE_TOLERANCE = 1e-14
 
-cdef inline bint is_close(double a, double b, /, double rel_tol = DEFAULT_RELATIVE_TOLERANCE, double abs_tol = DEFAULT_ABSOLUTE_TOLERANCE) noexcept:
+cdef inline bint is_close(double a, double b, double rel_tol = DEFAULT_RELATIVE_TOLERANCE, double abs_tol = DEFAULT_ABSOLUTE_TOLERANCE) noexcept:
     cdef double diff = fabs(a - b)
     if a == b:
         return True
