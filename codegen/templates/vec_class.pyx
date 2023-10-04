@@ -54,7 +54,7 @@ cdef class _VecClassName_:
             return True
         return #<GEN>: gen_for_each_dim("self.{dim} != other.{dim}", _Dims_, join=" or ")
 
-    def is_close(self, _VecClassName_ other, double rel_tol = DEFAULT_RELATIVE_TOLERANCE, double abs_tol = DEFAULT_ABSOLUTE_TOLERANCE) -> bool:
+    def is_close(self, _VecClassName_ other, /, double rel_tol = DEFAULT_RELATIVE_TOLERANCE, double abs_tol = DEFAULT_ABSOLUTE_TOLERANCE) -> bool:
         return #<GEN>: gen_for_each_dim("is_close(self.{dim}, other.{dim}, rel_tol, abs_tol)", _Dims_, join=" and ")
 
     def __bool__(self) -> bool:
@@ -156,13 +156,13 @@ cdef class _VecClassName_:
 
     #<IGNORE_NEXT>
     # noinspection PyTypeChecker
-    def distance_to(self, _VecClassName_ other) -> float:
+    def distance_to(self, _VecClassName_ other, /) -> float:
         #<GEN>: gen_for_each_dim("cdef _vTypeC_ d{dim} = self.{dim} - other.{dim}", _Dims_)
         return #<GEN>: f"sqrt(<double> ({gen_for_each_dim('d{dim} * d{dim}', _Dims_, join=' + ')}))"
 
     #<IGNORE_NEXT>
     # noinspection PyTypeChecker
-    def distance_sqr_to(self, _VecClassName_ other) -> float:
+    def distance_sqr_to(self, _VecClassName_ other, /) -> float:
         #<GEN>: gen_for_each_dim("cdef _vTypeC_ d{dim} = self.{dim} - other.{dim}", _Dims_)
         return #<GEN>: f"<double> ({gen_for_each_dim('d{dim} * d{dim}', _Dims_, join=' + ')})"
     #<IF>: _vType_ is float

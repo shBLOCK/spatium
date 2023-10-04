@@ -28,7 +28,7 @@ cdef class Transform2D:
         self.identity()
 
     #<OVERLOAD>
-    cdef void __init__(self, double xx, double xy, double yx, double yy, double ox, double oy) noexcept:
+    cdef void __init__(self, double xx, double xy, double yx, double yy, double ox, double oy, /) noexcept:
         self.xx = xx
         self.xy = xy
         self.yx = yx
@@ -37,13 +37,13 @@ cdef class Transform2D:
         self.oy = oy
 
     #<OVERLOAD>
-    cdef void __init__(self, Vec2 x, Vec2 y, Vec2 origin) noexcept:
+    cdef void __init__(self, Vec2 x, Vec2 y, Vec2 origin, /) noexcept:
         self.xx, self.xy = x.x, x.y
         self.yx, self.yy = y.x, y.y
         self.ox, self.oy = origin.x, origin.y
 
     #<OVERLOAD>
-    cdef void __init__(self, Transform2D transform) noexcept:
+    cdef void __init__(self, Transform2D transform, /) noexcept:
         self.xx = transform.xx
         self.xy = transform.xy
         self.yx = transform.yx
@@ -54,14 +54,14 @@ cdef class Transform2D:
     #<OVERLOAD_DISPATCHER>:__init__
 
     @staticmethod
-    def translating(Vec2 translation) -> Transform2D:
+    def translating(Vec2 translation, /) -> Transform2D:
         cdef Transform2D t = Transform2D.__new__(Transform2D)
         t.identity()
         t.ox, t.oy = translation.x, translation.y
         return t
 
     @staticmethod
-    def rotating(float rotation, Vec2 origin = None) -> Transform2D:
+    def rotating(float rotation, /, Vec2 origin = None) -> Transform2D:
         cdef double c = cos(rotation)
         cdef double s = sin(rotation)
         cdef Transform2D t = Transform2D.__new__(Transform2D)
@@ -74,7 +74,7 @@ cdef class Transform2D:
         return t
 
     @staticmethod
-    def scaling(Vec2 scale, Vec2 origin = None) -> Transform2D:
+    def scaling(Vec2 scale, /, Vec2 origin = None) -> Transform2D:
         cdef Transform2D t = Transform2D.__new__(Transform2D)
         t.xx = scale.x
         t.yy = scale.y
@@ -109,7 +109,7 @@ cdef class Transform2D:
                self.yx != (<Transform2D> other).yx or self.yy != (<Transform2D> other).yy or \
                self.ox != (<Transform2D> other).ox or self.oy != (<Transform2D> other).oy
 
-    def is_close(self, Transform2D other, double rel_tol = DEFAULT_RELATIVE_TOLERANCE, double abs_tol = DEFAULT_ABSOLUTE_TOLERANCE) -> bool:
+    def is_close(self, Transform2D other, /, double rel_tol = DEFAULT_RELATIVE_TOLERANCE, double abs_tol = DEFAULT_ABSOLUTE_TOLERANCE) -> bool:
         return is_close(self.xx, other.xx, rel_tol, abs_tol) and \
                is_close(self.xy, other.xy, rel_tol, abs_tol) and \
                is_close(self.yx, other.yx, rel_tol, abs_tol) and \
@@ -320,26 +320,26 @@ cdef class Transform2D:
         self.set_scale_y(value.y)
 
 
-    def translate_ip(self, Vec2 translation) -> Transform2D:
+    def translate_ip(self, Vec2 translation, /) -> Transform2D:
         self.ox = translation.x
         self.oy = translation.y
         return self
 
-    def translated(self, Vec2 translation) -> Transform2D:
+    def translated(self, Vec2 translation, /) -> Transform2D:
         cdef Transform2D t = self.copy()
         t.translate_ip(translation)
         return t
 
-    def rotate_ip(self, float rotation) -> Transform2D:
+    def rotate_ip(self, float rotation, /) -> Transform2D:
         self.__imul__(Transform2D.rotation(rotation))
         return self
 
-    def rotated(self, float rotation) -> Transform2D:
+    def rotated(self, float rotation, /) -> Transform2D:
         cdef Transform2D t = self.copy()
         t.rotate_ip(rotation)
         return t
 
-    def scale_ip(self, Vec2 scale) -> Transform2D:
+    def scale_ip(self, Vec2 scale, /) -> Transform2D:
         self.xx *= scale.x
         self.xy *= scale.y
         self.yx *= scale.x
@@ -348,7 +348,7 @@ cdef class Transform2D:
         self.oy *= scale.y
         return self
 
-    def scaled(self, Vec2 scale) -> Transform2D:
+    def scaled(self, Vec2 scale, /) -> Transform2D:
         cdef Transform2D t = self.copy()
         t.scale_ip(scale)
         return t

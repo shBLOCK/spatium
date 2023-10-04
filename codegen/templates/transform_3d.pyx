@@ -29,7 +29,7 @@ cdef class Transform3D:
         self.identity()
 
     #<OVERLOAD>
-    cdef void __init__(self, double xx, double xy, double xz, double yx, double yy, double yz, double zx, double zy, double zz, double ox, double oy, double oz) noexcept:
+    cdef void __init__(self, double xx, double xy, double xz, double yx, double yy, double yz, double zx, double zy, double zz, double ox, double oy, double oz, /) noexcept:
         self.xx = xx
         self.xy = xy
         self.xz = xz
@@ -44,14 +44,14 @@ cdef class Transform3D:
         self.oz = oz
 
     #<OVERLOAD>
-    cdef void __init__(self, Vec3 x, Vec3 y, Vec3 z, Vec3 origin) noexcept:
+    cdef void __init__(self, Vec3 x, Vec3 y, Vec3 z, Vec3 origin, /) noexcept:
         self.xx, self.xy, self.xz = x.x, x.y, x.z
         self.yx, self.yy, self.yz = y.x, y.y, y.z
         self.zx, self.zy, self.zz = z.x, z.y, z.z
         self.ox, self.oy, self.oz = origin.x, origin.y, origin.z
 
     #<OVERLOAD>
-    cdef void __init__(self, Transform3D transform) noexcept:
+    cdef void __init__(self, Transform3D transform, /) noexcept:
         self.xx = transform.xx
         self.xy = transform.xy
         self.xz = transform.xz
@@ -68,7 +68,7 @@ cdef class Transform3D:
     #<OVERLOAD_DISPATCHER>:__init__
 
     @staticmethod
-    def translating(Vec3 translation) -> Transform3D:
+    def translating(Vec3 translation, /) -> Transform3D:
         cdef Transform3D t = Transform3D.__new__(Transform3D)
         t.identity()
         t.ox += translation.x
@@ -77,7 +77,7 @@ cdef class Transform3D:
         return t
 
     @staticmethod
-    def rotating(Vec3 axis, float angle, Vec3 origin = None) -> Transform3D:
+    def rotating(Vec3 axis, float angle, /, Vec3 origin = None) -> Transform3D:
         cdef Transform3D trans = Transform3D.__new__(Transform3D)
 
         cdef double axis_x_sq = axis.x * axis.x
@@ -115,7 +115,7 @@ cdef class Transform3D:
         return trans
 
     @staticmethod
-    def scaling(Vec3 scale, Vec3 origin = None) -> Transform3D:
+    def scaling(Vec3 scale, /, Vec3 origin = None) -> Transform3D:
         cdef Transform3D t = Transform3D.__new__(Transform3D)
         t.identity()
         t.xx = scale.x
@@ -164,7 +164,7 @@ cdef class Transform3D:
                self.zx != (<Transform3D> other).zx or self.zy != (<Transform3D> other).zy or self.zz != (<Transform3D> other).zz or\
                self.ox != (<Transform3D> other).ox or self.oy != (<Transform3D> other).oy or self.oz != (<Transform3D> other).oz
 
-    def is_close(self, Transform3D other, double rel_tol = DEFAULT_RELATIVE_TOLERANCE, double abs_tol = DEFAULT_ABSOLUTE_TOLERANCE) -> bool:
+    def is_close(self, Transform3D other, /, double rel_tol = DEFAULT_RELATIVE_TOLERANCE, double abs_tol = DEFAULT_ABSOLUTE_TOLERANCE) -> bool:
         return is_close(self.xx, other.xx, rel_tol, abs_tol) and \
                is_close(self.xy, other.xy, rel_tol, abs_tol) and \
                is_close(self.xz, other.xz, rel_tol, abs_tol) and \
@@ -394,27 +394,27 @@ cdef class Transform3D:
         t.oz = -t.tdotz(self.ox, self.oy, self.oz)
         return t
 
-    def translate_ip(self, Vec3 translation) -> Transform3D:
+    def translate_ip(self, Vec3 translation, /) -> Transform3D:
         self.ox += translation.x
         self.oy += translation.y
         self.oz += translation.z
         return self
 
-    def translated(self, Vec3 translation) -> Transform3D:
+    def translated(self, Vec3 translation, /) -> Transform3D:
         cdef Transform3D t = self.copy()
         t.translate_ip(translation)
         return t
 
-    def rotate_ip(self, Vec3 axis, float angle) -> Transform3D:
+    def rotate_ip(self, Vec3 axis, float angle, /) -> Transform3D:
         self.__imul__(Transform3D.rotating(axis, angle))
         return self
 
-    def rotated(self, Vec3 axis, float angle) -> Transform3D:
+    def rotated(self, Vec3 axis, float angle, /) -> Transform3D:
         cdef Transform3D t = self.copy()
         t.rotate_ip(axis, angle)
         return t
 
-    def scale_ip(self, Vec3 scale) -> Transform3D:
+    def scale_ip(self, Vec3 scale, /) -> Transform3D:
         self.xx *= scale.x
         self.yx *= scale.x
         self.zx *= scale.x
@@ -426,7 +426,7 @@ cdef class Transform3D:
         self.zz *= scale.z
         return self
 
-    def scaled(self, Vec3 scale) -> Transform3D:
+    def scaled(self, Vec3 scale, /) -> Transform3D:
         cdef Transform3D t = self.copy()
         t.scale_ip(scale)
         return t
