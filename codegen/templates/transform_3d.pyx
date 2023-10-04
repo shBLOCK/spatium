@@ -29,7 +29,7 @@ cdef class Transform3D:
         self.identity()
 
     #<OVERLOAD>
-    cdef void __init__(self, double xx, double xy, double xz, double yx, double yy, double yz, double zx, double zy, double zz, double ox, double oy, double oz, /) noexcept:
+    cdef void __init__(self, double xx, double xy, double xz, double yx, double yy, double yz, double zx, double zy, double zz, double ox, double oy, double oz) noexcept:
         self.xx = xx
         self.xy = xy
         self.xz = xz
@@ -44,14 +44,14 @@ cdef class Transform3D:
         self.oz = oz
 
     #<OVERLOAD>
-    cdef void __init__(self, Vec3 x, Vec3 y, Vec3 z, Vec3 origin, /) noexcept:
+    cdef void __init__(self, Vec3 x, Vec3 y, Vec3 z, Vec3 origin) noexcept:
         self.xx, self.xy, self.xz = x.x, x.y, x.z
         self.yx, self.yy, self.yz = y.x, y.y, y.z
         self.zx, self.zy, self.zz = z.x, z.y, z.z
         self.ox, self.oy, self.oz = origin.x, origin.y, origin.z
 
     #<OVERLOAD>
-    cdef void __init__(self, Transform3D transform, /) noexcept:
+    cdef void __init__(self, Transform3D transform) noexcept:
         self.xx = transform.xx
         self.xy = transform.xy
         self.xz = transform.xz

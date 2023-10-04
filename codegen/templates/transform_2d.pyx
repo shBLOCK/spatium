@@ -28,7 +28,7 @@ cdef class Transform2D:
         self.identity()
 
     #<OVERLOAD>
-    cdef void __init__(self, double xx, double xy, double yx, double yy, double ox, double oy, /) noexcept:
+    cdef void __init__(self, double xx, double xy, double yx, double yy, double ox, double oy) noexcept:
         self.xx = xx
         self.xy = xy
         self.yx = yx
@@ -37,13 +37,13 @@ cdef class Transform2D:
         self.oy = oy
 
     #<OVERLOAD>
-    cdef void __init__(self, Vec2 x, Vec2 y, Vec2 origin, /) noexcept:
+    cdef void __init__(self, Vec2 x, Vec2 y, Vec2 origin) noexcept:
         self.xx, self.xy = x.x, x.y
         self.yx, self.yy = y.x, y.y
         self.ox, self.oy = origin.x, origin.y
 
     #<OVERLOAD>
-    cdef void __init__(self, Transform2D transform, /) noexcept:
+    cdef void __init__(self, Transform2D transform) noexcept:
         self.xx = transform.xx
         self.xy = transform.xy
         self.yx = transform.yx
