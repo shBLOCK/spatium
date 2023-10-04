@@ -77,7 +77,7 @@ cdef class Transform3D:
         return t
 
     @staticmethod
-    def rotating(Vec3 axis, float angle) -> Transform3D:
+    def rotating(Vec3 axis, float angle, Vec3 origin = None) -> Transform3D:
         cdef Transform3D trans = Transform3D.__new__(Transform3D)
 
         cdef double axis_x_sq = axis.x * axis.x
@@ -107,15 +107,26 @@ cdef class Transform3D:
         trans.zy = xyzt - zyxs
         trans.yz = xyzt + zyxs
 
+        if origin is not None:
+            trans.ox = origin.x
+            trans.oy = origin.y
+            trans.oz = origin.z
+
         return trans
 
     @staticmethod
-    def scaling(Vec3 scale) -> Transform3D:
+    def scaling(Vec3 scale, Vec3 origin = None) -> Transform3D:
         cdef Transform3D t = Transform3D.__new__(Transform3D)
         t.identity()
         t.xx = scale.x
         t.yy = scale.y
         t.zz = scale.z
+
+        if origin is not None:
+            t.ox = origin.x
+            t.oy = origin.y
+            t.oz = origin.z
+
         return t
 
     cdef inline Transform3D copy(self) noexcept:
