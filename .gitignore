@@ -3,7 +3,9 @@
 /build/
 /dist/
 /gdmath.egg-info/
+/src/gdmath.egg-info/
 /src/gdmath/*.c
+/src/gdmath/*.cpp
 /src/gdmath/*.pyd
 /src/gdmath/_gdmath.pyx
 /codegen/output/*
