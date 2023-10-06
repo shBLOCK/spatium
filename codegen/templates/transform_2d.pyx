@@ -245,13 +245,14 @@ cdef class Transform2D:
         t.oy = self.muly(other.ox, other.oy)
         return t
 
-    def __imatmul__(self, Transform2D other) -> None:
+    def __imatmul__(self, Transform2D other) -> Transform2D:
         self.xx = other.tdotx(self.xx, self.xy)
         self.xy = other.tdoty(self.xx, self.xy)
         self.yx = other.tdotx(self.yx, self.yy)
         self.yy = other.tdoty(self.yx, self.yy)
         self.ox = other.mulx(self.ox, self.oy)
         self.oy = other.muly(self.ox, self.oy)
+        return self
 
     cdef inline py_float _determinant(self) noexcept:
         return self.xx * self.yy - self.xy * self.yx

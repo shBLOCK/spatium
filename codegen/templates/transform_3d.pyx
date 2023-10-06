@@ -366,7 +366,7 @@ cdef class Transform3D:
         t.oz = self.mulz(other.ox, other.oy, other.oz)
         return t
 
-    def __imatmul__(self, Transform3D other) -> None:
+    def __imatmul__(self, Transform3D other) -> Transform3D:
         self.xx = other.tdotx(self.xx, self.xy, self.xz)
         self.xy = other.tdoty(self.xx, self.xy, self.xz)
         self.xz = other.tdotz(self.xx, self.xy, self.xz)
@@ -379,6 +379,7 @@ cdef class Transform3D:
         self.ox = other.mulx(self.ox, self.oy, self.oz)
         self.oy = other.muly(self.ox, self.oy, self.oz)
         self.oz = other.mulz(self.ox, self.oy, self.oz)
+        return self
 
     cdef inline py_float _determinant(self) noexcept:
         return (self.xx * (self.yy * self.zz - self.yz * self.zy) -
