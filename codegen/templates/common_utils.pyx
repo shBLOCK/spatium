@@ -7,8 +7,8 @@ ctypedef long long py_int
 ctypedef long double py_float
 
 
-DEF DEFAULT_RELATIVE_TOLERANCE = 1e-5
-DEF DEFAULT_ABSOLUTE_TOLERANCE = 1e-14
+DEF DEFAULT_RELATIVE_TOLERANCE = 1e-09
+DEF DEFAULT_ABSOLUTE_TOLERANCE = 1e-15
 
 
 cdef inline bint is_close(py_float a, py_float b, py_float rel_tol = DEFAULT_RELATIVE_TOLERANCE, py_float abs_tol = DEFAULT_ABSOLUTE_TOLERANCE) noexcept:

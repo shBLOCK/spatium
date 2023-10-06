@@ -47,7 +47,7 @@ def test_translation_constructor():
 
 def test_rotating_constructor():
     t = Transform3D.rotating(Vec3(1.85, 9.23, 3.42).normalized, 1.98)
-    assert t.is_close(Transform3D(-0.350185, 0.551229, -0.757309, -0.075323, 0.789313, 0.609353, 0.933647, 0.270429, -0.234886, 0, 0, 0))
+    assert t.is_close(Transform3D(-0.350185, 0.551229, -0.757309, -0.075323, 0.789313, 0.609353, 0.933647, 0.270429, -0.234886, 0, 0, 0), rel_tol=1e-5)
 
 def test_scaling_constructor():
     t = Transform3D.scaling(Vec3(1, 2, 3))
