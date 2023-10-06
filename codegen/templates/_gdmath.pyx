@@ -7,6 +7,7 @@
 #cython: cdivision=True
 #cython: always_allow_keywords=True
 #cython: optimize.use_switch=True
+##distutils: language = c++
 
 cimport cython
 

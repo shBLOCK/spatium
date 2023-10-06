@@ -31,6 +31,9 @@ classifiers = [
 "Source" = "https://github.com/shBLOCK/GdMath"
 "Issue Tracker" = "https://github.com/shBLOCK/GdMath/issues"
 
+[tool.cython]
+language_level = "3"
+
 [tool.cibuildwheel.windows]
 archs = ["AMD64", "x86"]
 

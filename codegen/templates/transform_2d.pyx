@@ -1,11 +1,11 @@
 cimport cython
 
 cdef class Vec2:
-    cdef double x, y
+    cdef py_float x, y
 
 
 #<TEMPLATE_BEGIN>
-from libc.math cimport atan2, sin, cos, sqrt, NAN
+from libc.math cimport atan2l, sinl, cosl, sqrtl, NAN
 
 
 @cython.auto_pickle(True)
@@ -13,9 +13,9 @@ from libc.math cimport atan2, sin, cos, sqrt, NAN
 @cython.no_gc
 @cython.final
 cdef class Transform2D:
-    cdef double xx, xy
-    cdef double yx, yy
-    cdef double ox, oy
+    cdef py_float xx, xy
+    cdef py_float yx, yy
+    cdef py_float ox, oy
 
 
     cdef inline void identity(self) noexcept:
@@ -28,7 +28,7 @@ cdef class Transform2D:
         self.identity()
 
     #<OVERLOAD>
-    cdef void __init__(self, double xx, double xy, double yx, double yy, double ox, double oy) noexcept:
+    cdef void __init__(self, py_float xx, py_float xy, py_float yx, py_float yy, py_float ox, py_float oy) noexcept:
         self.xx = xx
         self.xy = xy
         self.yx = yx
@@ -61,9 +61,9 @@ cdef class Transform2D:
         return t
 
     @staticmethod
-    def rotating(float rotation, /, Vec2 origin = None) -> Transform2D:
-        cdef double c = cos(rotation)
-        cdef double s = sin(rotation)
+    def rotating(py_float rotation, /, Vec2 origin = None) -> Transform2D:
+        cdef py_float c = cosl(rotation)
+        cdef py_float s = sinl(rotation)
         cdef Transform2D t = Transform2D.__new__(Transform2D)
         t.xx = c
         t.xy = s
@@ -109,13 +109,24 @@ cdef class Transform2D:
                self.yx != (<Transform2D> other).yx or self.yy != (<Transform2D> other).yy or \
                self.ox != (<Transform2D> other).ox or self.oy != (<Transform2D> other).oy
 
-    def is_close(self, Transform2D other, /, double rel_tol = DEFAULT_RELATIVE_TOLERANCE, double abs_tol = DEFAULT_ABSOLUTE_TOLERANCE) -> bool:
+    def is_close(self, Transform2D other, /, py_float rel_tol = DEFAULT_RELATIVE_TOLERANCE, py_float abs_tol = DEFAULT_ABSOLUTE_TOLERANCE) -> bool:
         return is_close(self.xx, other.xx, rel_tol, abs_tol) and \
                is_close(self.xy, other.xy, rel_tol, abs_tol) and \
                is_close(self.yx, other.yx, rel_tol, abs_tol) and \
                is_close(self.yy, other.yy, rel_tol, abs_tol) and \
                is_close(self.ox, other.ox, rel_tol, abs_tol) and \
                is_close(self.oy, other.oy, rel_tol, abs_tol)
+
+    #TODO: Better hashing
+    def __hash__(self) -> py_int:
+        cdef py_int h = 0
+        h ^= bitcast_float(self.xx)
+        h ^= rotl_ratio(bitcast_float(self.xy), 1, 6)
+        h ^= rotl_ratio(bitcast_float(self.yx), 2, 6)
+        h ^= rotl_ratio(bitcast_float(self.yy), 3, 6)
+        h ^= rotl_ratio(bitcast_float(self.ox), 4, 6)
+        h ^= rotl_ratio(bitcast_float(self.oy), 5, 6)
+        return h
 
     @property
     def x(self) -> Vec2:
@@ -153,7 +164,7 @@ cdef class Transform2D:
         self.ox = value.x
         self.oy = value.y
 
-    def __getitem__(self, int item) -> Vec2:
+    def __getitem__(self, py_int item) -> Vec2:
         cdef Vec2 vec = Vec2.__new__(Vec2)
 
         if item == 0:
@@ -170,7 +181,7 @@ cdef class Transform2D:
 
         return vec
 
-    def __setitem__(self, int key, Vec2 value) -> None:
+    def __setitem__(self, py_int key, Vec2 value) -> None:
         if key == 0:
             self.xx = value.x
             self.xy = value.y
@@ -183,19 +194,19 @@ cdef class Transform2D:
         else:
             raise IndexError(key)
 
-    def __len__(self) -> int:
+    def __len__(self) -> py_int:
         return 3
 
-    cdef inline double tdotx(self, double x, double y) noexcept:
+    cdef inline py_float tdotx(self, py_float x, py_float y) noexcept:
         return x * self.xx + y * self.yx
 
-    cdef inline double mulx(self, double x, double y) noexcept:
+    cdef inline py_float mulx(self, py_float x, py_float y) noexcept:
         return self.tdotx(x, y) + self.ox
 
-    cdef inline double tdoty(self, double x, double y) noexcept:
+    cdef inline py_float tdoty(self, py_float x, py_float y) noexcept:
         return x * self.xy + y * self.yy
 
-    cdef inline double muly(self, double x, double y) noexcept:
+    cdef inline py_float muly(self, py_float x, py_float y) noexcept:
         return self.tdoty(x, y) + self.oy
 
     def __mul__(self, Vec2 other) -> Vec2:
@@ -242,15 +253,15 @@ cdef class Transform2D:
         self.ox = other.mulx(self.ox, self.oy)
         self.oy = other.muly(self.ox, self.oy)
 
-    cdef inline double _determinant(self) noexcept:
+    cdef inline py_float _determinant(self) noexcept:
         return self.xx * self.yy - self.xy * self.yx
 
     @property
-    def determinant(self) -> float:
+    def determinant(self) -> py_float:
         return self._determinant()
 
     def __invert__(self) -> Transform2D:
-        cdef double i_det = 1.0 / self._determinant()
+        cdef py_float i_det = 1.0 / self._determinant()
         cdef Transform2D t = Transform2D.__new__(Transform2D)
         t.xx = self.yy * +i_det
         t.xy = self.xy * -i_det
@@ -261,14 +272,14 @@ cdef class Transform2D:
         return t
 
 
-    cdef inline double get_rotation(self) noexcept:
-        return atan2(self.xy, self.xx)
+    cdef inline py_float get_rotation(self) noexcept:
+        return atan2l(self.xy, self.xx)
 
-    cdef inline void set_rotation(self, double rotation) noexcept:
-        cdef double scale_x = self.get_scale_x()
-        cdef double scale_y = self.get_scale_y()
-        cdef double c = cos(rotation)
-        cdef double s = sin(rotation)
+    cdef inline void set_rotation(self, py_float rotation) noexcept:
+        cdef py_float scale_x = self.get_scale_x()
+        cdef py_float scale_y = self.get_scale_y()
+        cdef py_float c = cosl(rotation)
+        cdef py_float s = sinl(rotation)
         self.xx = c
         self.xy = s
         self.yx = -s
@@ -276,30 +287,30 @@ cdef class Transform2D:
         self.set_scale_x(scale_x)
         self.set_scale_y(scale_y)
 
-    cdef inline double get_scale_x(self) noexcept:
-        return sqrt(self.xx * self.xx + self.xy * self.xy)
+    cdef inline py_float get_scale_x(self) noexcept:
+        return sqrtl(self.xx * self.xx + self.xy * self.xy)
 
-    cdef inline double get_scale_y(self) noexcept:
-        cdef double det = self._determinant()
-        cdef double det_sign = 1.0 if det > 0.0 else -1.0 if det < 0.0 else 0.0 if det == 0.0 else NAN
-        return sqrt(self.yx * self.yx + self.yy * self.yy) * det_sign
+    cdef inline py_float get_scale_y(self) noexcept:
+        cdef py_float det = self._determinant()
+        cdef py_float det_sign = 1.0 if det > 0.0 else -1.0 if det < 0.0 else 0.0 if det == 0.0 else NAN
+        return sqrtl(self.yx * self.yx + self.yy * self.yy) * det_sign
 
-    cdef inline void set_scale_x(self, double value) noexcept:
-        cdef double m = value / sqrt(self.xx * self.xx + self.xy * self.xy)
+    cdef inline void set_scale_x(self, py_float value) noexcept:
+        cdef py_float m = value / sqrtl(self.xx * self.xx + self.xy * self.xy)
         self.xx *= m
         self.xy *= m
 
-    cdef inline void set_scale_y(self, double value) noexcept:
-        cdef double m = value / sqrt(self.yx * self.yx + self.yy * self.yy)
+    cdef inline void set_scale_y(self, py_float value) noexcept:
+        cdef py_float m = value / sqrtl(self.yx * self.yx + self.yy * self.yy)
         self.yx *= m
         self.yy *= m
 
     @property
-    def rotation(self) -> float:
+    def rotation(self) -> py_float:
         return self.get_rotation()
 
     @rotation.setter
-    def rotation(self, float value) -> None:
+    def rotation(self, py_float value) -> None:
         self.set_rotation(value)
 
     # @property
@@ -330,11 +341,11 @@ cdef class Transform2D:
         t.translate_ip(translation)
         return t
 
-    def rotate_ip(self, float rotation, /) -> Transform2D:
+    def rotate_ip(self, py_float rotation, /) -> Transform2D:
         self.__imul__(Transform2D.rotation(rotation))
         return self
 
-    def rotated(self, float rotation, /) -> Transform2D:
+    def rotated(self, py_float rotation, /) -> Transform2D:
         cdef Transform2D t = self.copy()
         t.rotate_ip(rotation)
         return t

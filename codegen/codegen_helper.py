@@ -117,9 +117,9 @@ class _Func:
         self.params = []
         for p in c_params:
             match p:
-                case "float" | "double":
+                case "float" | "double" | "py_float":
                     self.params.append(float | int)
-                case "int" | "long":
+                case "int" | "long" | "py_int":
                     self.params.append(int)
                 case "self":
                     self.params.append(Self)
@@ -130,9 +130,9 @@ class _Func:
         match c_ret:
             case None | "" | "void":
                 self.ret = None
-            case "float" | "double":
+            case "float" | "double" | "py_float":
                 self.ret = float
-            case "int" | "long":
+            case "int" | "long" | "py_int":
                 self.ret = int
             case _:
                 self.ret = c_ret

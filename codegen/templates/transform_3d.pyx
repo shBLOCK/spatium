@@ -1,11 +1,11 @@
 cimport cython
 
 cdef class Vec3:
-    cdef double x, y, z
+    cdef py_float x, y, z
 
 
 #<TEMPLATE_BEGIN>
-from libc.math cimport sin, cos
+from libc.math cimport sinl, cosl
 
 
 @cython.auto_pickle(True)
@@ -13,10 +13,10 @@ from libc.math cimport sin, cos
 @cython.no_gc
 @cython.final
 cdef class Transform3D:
-    cdef double xx, xy, xz
-    cdef double yx, yy, yz
-    cdef double zx, zy, zz
-    cdef double ox, oy, oz
+    cdef py_float xx, xy, xz
+    cdef py_float yx, yy, yz
+    cdef py_float zx, zy, zz
+    cdef py_float ox, oy, oz
 
     cdef inline void identity(self) noexcept:
         self.xx, self.xy, self.xz = 1.0, 0.0, 0.0
@@ -29,7 +29,7 @@ cdef class Transform3D:
         self.identity()
 
     #<OVERLOAD>
-    cdef void __init__(self, double xx, double xy, double xz, double yx, double yy, double yz, double zx, double zy, double zz, double ox, double oy, double oz) noexcept:
+    cdef void __init__(self, py_float xx, py_float xy, py_float xz, py_float yx, py_float yy, py_float yz, py_float zx, py_float zy, py_float zz, py_float ox, py_float oy, py_float oz) noexcept:
         self.xx = xx
         self.xy = xy
         self.xz = xz
@@ -77,19 +77,19 @@ cdef class Transform3D:
         return t
 
     @staticmethod
-    def rotating(Vec3 axis, float angle, /, Vec3 origin = None) -> Transform3D:
+    def rotating(Vec3 axis, py_float angle, /, Vec3 origin = None) -> Transform3D:
         cdef Transform3D trans = Transform3D.__new__(Transform3D)
 
-        cdef double axis_x_sq = axis.x * axis.x
-        cdef double axis_y_sq = axis.y * axis.y
-        cdef double axis_z_sq = axis.z * axis.z
-        cdef double c = cos(angle)
+        cdef py_float axis_x_sq = axis.x * axis.x
+        cdef py_float axis_y_sq = axis.y * axis.y
+        cdef py_float axis_z_sq = axis.z * axis.z
+        cdef py_float c = cosl(angle)
 
         trans.xx = axis_x_sq + c * (1.0 - axis_x_sq)
         trans.yy = axis_y_sq + c * (1.0 - axis_y_sq)
         trans.zz = axis_z_sq + c * (1.0 - axis_z_sq)
 
-        cdef double s = sin(angle)
+        cdef py_float s = sinl(angle)
         cdef t = 1.0 - c
 
         cdef xyzt = axis.x * axis.y * t
@@ -164,7 +164,7 @@ cdef class Transform3D:
                self.zx != (<Transform3D> other).zx or self.zy != (<Transform3D> other).zy or self.zz != (<Transform3D> other).zz or\
                self.ox != (<Transform3D> other).ox or self.oy != (<Transform3D> other).oy or self.oz != (<Transform3D> other).oz
 
-    def is_close(self, Transform3D other, /, double rel_tol = DEFAULT_RELATIVE_TOLERANCE, double abs_tol = DEFAULT_ABSOLUTE_TOLERANCE) -> bool:
+    def is_close(self, Transform3D other, /, py_float rel_tol = DEFAULT_RELATIVE_TOLERANCE, py_float abs_tol = DEFAULT_ABSOLUTE_TOLERANCE) -> bool:
         return is_close(self.xx, other.xx, rel_tol, abs_tol) and \
                is_close(self.xy, other.xy, rel_tol, abs_tol) and \
                is_close(self.xz, other.xz, rel_tol, abs_tol) and \
@@ -177,6 +177,23 @@ cdef class Transform3D:
                is_close(self.ox, other.ox, rel_tol, abs_tol) and \
                is_close(self.oy, other.oy, rel_tol, abs_tol) and \
                is_close(self.oz, other.oz, rel_tol, abs_tol)
+
+    #TODO: Better hashing
+    def __hash__(self) -> py_int:
+        cdef py_int h = 0
+        h ^= bitcast_float(self.xx)
+        h ^= rotl_ratio(bitcast_float(self.xy), 1, 12)
+        h ^= rotl_ratio(bitcast_float(self.xz), 2, 12)
+        h ^= rotl_ratio(bitcast_float(self.yx), 3, 12)
+        h ^= rotl_ratio(bitcast_float(self.yy), 4, 12)
+        h ^= rotl_ratio(bitcast_float(self.yz), 5, 12)
+        h ^= rotl_ratio(bitcast_float(self.zx), 6, 12)
+        h ^= rotl_ratio(bitcast_float(self.zy), 7, 12)
+        h ^= rotl_ratio(bitcast_float(self.zz), 8, 12)
+        h ^= rotl_ratio(bitcast_float(self.ox), 9, 12)
+        h ^= rotl_ratio(bitcast_float(self.oy), 10, 12)
+        h ^= rotl_ratio(bitcast_float(self.oz), 11, 12)
+        return h
 
     @property
     def x(self) -> Vec3:
@@ -234,7 +251,7 @@ cdef class Transform3D:
         self.oy = value.y
         self.oz = value.z
 
-    def __getitem__(self, int item) -> Vec3:
+    def __getitem__(self, py_int item) -> Vec3:
         cdef vec = Vec3.__new__(Vec3)
 
         if item == 0:
@@ -258,7 +275,7 @@ cdef class Transform3D:
 
         return vec
 
-    def __setitem__(self, int key, Vec3 value) -> None:
+    def __setitem__(self, py_int key, Vec3 value) -> None:
         if key == 0:
             self.xx = value.x
             self.xy = value.y
@@ -278,25 +295,25 @@ cdef class Transform3D:
         else:
             raise IndexError(key)
 
-    def __len__(self) -> int:
+    def __len__(self) -> py_int:
         return 4
 
-    cdef inline double tdotx(self, double x, double y, double z) noexcept:
+    cdef inline py_float tdotx(self, py_float x, py_float y, py_float z) noexcept:
         return x * self.xx + y * self.yx + z * self.zx
 
-    cdef inline double mulx(self, double x, double y, double z) noexcept:
+    cdef inline py_float mulx(self, py_float x, py_float y, py_float z) noexcept:
         return self.tdotx(x, y, z) + self.ox
 
-    cdef inline double tdoty(self, double x, double y, double z) noexcept:
+    cdef inline py_float tdoty(self, py_float x, py_float y, py_float z) noexcept:
         return x * self.xy + y * self.yy + z * self.zy
 
-    cdef inline double muly(self, double x, double y, double z) noexcept:
+    cdef inline py_float muly(self, py_float x, py_float y, py_float z) noexcept:
         return self.tdoty(x, y, z) + self.oy
 
-    cdef inline double tdotz(self, double x, double y, double z) noexcept:
+    cdef inline py_float tdotz(self, py_float x, py_float y, py_float z) noexcept:
         return x * self.xz + y * self.yz + z * self.zz
 
-    cdef inline double mulz(self, double x, double y, double z) noexcept:
+    cdef inline py_float mulz(self, py_float x, py_float y, py_float z) noexcept:
         return self.tdotz(x, y, z) + self.oz
 
     def __mul__(self, Vec3 other) -> Vec3:
@@ -363,21 +380,21 @@ cdef class Transform3D:
         self.oy = other.muly(self.ox, self.oy, self.oz)
         self.oz = other.mulz(self.ox, self.oy, self.oz)
 
-    cdef inline double _determinant(self) noexcept:
+    cdef inline py_float _determinant(self) noexcept:
         return (self.xx * (self.yy * self.zz - self.yz * self.zy) -
                 self.yx * (self.xy * self.zz - self.xz * self.zy) +
                 self.zx * (self.xy * self.yz - self.yy * self.xz))
 
     @property
-    def determinant(self) -> float:
+    def determinant(self) -> py_float:
         return self._determinant()
 
     def __invert__(self) -> Transform3D:
-        cdef double cox = self.yy * self.zz - self.yz * self.zy
-        cdef double coy = self.xz * self.zy - self.xy * self.zz
-        cdef double coz = self.xy * self.yz - self.yy * self.xz
-        cdef double det = self.xx * cox + self.yx * coy + self.zx * coz
-        cdef double i_det = 1.0 / det
+        cdef py_float cox = self.yy * self.zz - self.yz * self.zy
+        cdef py_float coy = self.xz * self.zy - self.xy * self.zz
+        cdef py_float coz = self.xy * self.yz - self.yy * self.xz
+        cdef py_float det = self.xx * cox + self.yx * coy + self.zx * coz
+        cdef py_float i_det = 1.0 / det
 
         cdef Transform3D t = Transform3D.__new__(Transform3D)
         t.xx = cox * i_det
@@ -405,11 +422,11 @@ cdef class Transform3D:
         t.translate_ip(translation)
         return t
 
-    def rotate_ip(self, Vec3 axis, float angle, /) -> Transform3D:
+    def rotate_ip(self, Vec3 axis, py_float angle, /) -> Transform3D:
         self.__imul__(Transform3D.rotating(axis, angle))
         return self
 
-    def rotated(self, Vec3 axis, float angle, /) -> Transform3D:
+    def rotated(self, Vec3 axis, py_float angle, /) -> Transform3D:
         cdef Transform3D t = self.copy()
         t.rotate_ip(axis, angle)
         return t

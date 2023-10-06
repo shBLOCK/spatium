@@ -187,3 +187,10 @@ def test_normalized():
     assert math.isclose(a.x, 0.2672612419124244)
     assert math.isclose(a.y, 0.5345224838248488)
     assert math.isclose(a.z, 0.8017837257372732)
+
+def test_big_int():
+    Vec2i(2**63-1)
+
+def test_float_precision():
+    assert Vec2(math.ulp(0)).x == math.ulp(0)
+    assert Vec2(1e308).x == 1e308

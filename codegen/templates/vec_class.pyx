@@ -1,5 +1,5 @@
 cimport cython
-from libc.math cimport sqrt
+from libc.math cimport sqrtl
 
 # Dummy types for the IDE
 ctypedef _VecClassName_
@@ -54,11 +54,25 @@ cdef class _VecClassName_:
             return True
         return #<GEN>: gen_for_each_dim("self.{dim} != other.{dim}", _Dims_, join=" or ")
 
-    def is_close(self, _VecClassName_ other, /, double rel_tol = DEFAULT_RELATIVE_TOLERANCE, double abs_tol = DEFAULT_ABSOLUTE_TOLERANCE) -> bool:
-        return #<GEN>: gen_for_each_dim("is_close(self.{dim}, other.{dim}, rel_tol, abs_tol)", _Dims_, join=" and ")
+    def is_close(self, _VecClassName_ other, /, py_float rel_tol = DEFAULT_RELATIVE_TOLERANCE, py_float abs_tol = DEFAULT_ABSOLUTE_TOLERANCE) -> bool:
+        return #<GEN>: gen_for_each_dim("is_close(<py_float> self.{dim}, <py_float> other.{dim}, rel_tol, abs_tol)", _Dims_, join=" and ")
 
     def __bool__(self) -> bool:
         return #<GEN>: gen_for_each_dim("self.{dim} == 0", _Dims_, join=" and ")
+
+    #TODO: Better hashing
+    #<IF>: _vType_ is int
+    def __hash__(self) -> py_int:
+        cdef py_int h = 0
+        #<GEN>: gen_for_each_dim("h ^= rotl_ratio(self.{dim}, {index}, _Dims_)", _Dims_, join="\n")
+        return h
+    #<ENDIF>
+    #<IF>: _vType_ is float
+    def __hash__(self) -> py_int:
+        cdef py_int h = 0
+        #<GEN>: gen_for_each_dim("h ^= rotl_ratio(bitcast_float(self.{dim}), {index}, _Dims_)", _Dims_, join="\n")
+        return h
+    #<ENDIF>
 
     def __pos__(self) -> _VecClassName_:
         cdef _VecClassName_ vec = _VecClassName_.__new__(_VecClassName_)
@@ -79,8 +93,8 @@ cdef class _VecClassName_:
     #<OVERLOAD>
     cdef Vec2 __mul__(self, Transform2D t):
         cdef Vec2 vec = Vec2.__new__(Vec2)
-        cdef double x = self.x - t.ox
-        cdef double y = self.y - t.oy
+        cdef py_float x = self.x - t.ox
+        cdef py_float y = self.y - t.oy
         vec.x = t.xx * x + t.xy * y
         vec.y = t.yx * x + t.yy * y
         return vec
@@ -89,9 +103,9 @@ cdef class _VecClassName_:
     #<OVERLOAD>
     cdef Vec3 __mul__(self, Transform3D t):
         cdef Vec3 vec = Vec3.__new__(Vec3)
-        cdef double x = self.x - t.ox
-        cdef double y = self.y - t.oy
-        cdef double z = self.z - t.oz
+        cdef py_float x = self.x - t.ox
+        cdef py_float y = self.y - t.oy
+        cdef py_float z = self.z - t.oz
         vec.x = t.xx * x + t.xy * y + t.xz * z
         vec.y = t.yx * x + t.yy * y + t.yz * z
         vec.z = t.zx * x + t.zy * y + t.zz * z
@@ -138,38 +152,38 @@ cdef class _VecClassName_:
     #<IGNORE_NEXT>
     # noinspection PyTypeChecker
     @property
-    def length(self) -> float:
-        return #<GEN>: f"sqrt({gen_for_each_dim('self.{dim} * self.{dim}', _Dims_, join=' + ')})"
+    def length(self) -> py_float:
+        return #<GEN>: f"sqrtl({gen_for_each_dim('<py_float> (self.{dim} * self.{dim})', _Dims_, join=' + ')})"
 
     #<IGNORE_NEXT>
     # noinspection PyTypeChecker
     @property
-    def length_sqr(self) -> float:
+    def length_sqr(self) -> py_float:
         return #<GEN>: gen_for_each_dim("self.{dim} * self.{dim}", _Dims_, join=" + ")
 
     #<IGNORE_NEXT>
     # noinspection PyTypeChecker
-    def __or__(self, _VecClassName_ other) -> float:
+    def __or__(self, _VecClassName_ other) -> py_float:
         """Equivalent to distance_to()"""
         #<GEN>: gen_for_each_dim("cdef _vTypeC_ d{dim} = self.{dim} - other.{dim}", _Dims_)
-        return #<GEN>: f"sqrt(<double> ({gen_for_each_dim('d{dim} * d{dim}', _Dims_, join=' + ')}))"
+        return #<GEN>: f"sqrtl(<py_float> ({gen_for_each_dim('d{dim} * d{dim}', _Dims_, join=' + ')}))"
 
     #<IGNORE_NEXT>
     # noinspection PyTypeChecker
-    def distance_to(self, _VecClassName_ other, /) -> float:
+    def distance_to(self, _VecClassName_ other, /) -> py_float:
         #<GEN>: gen_for_each_dim("cdef _vTypeC_ d{dim} = self.{dim} - other.{dim}", _Dims_)
-        return #<GEN>: f"sqrt(<double> ({gen_for_each_dim('d{dim} * d{dim}', _Dims_, join=' + ')}))"
+        return #<GEN>: f"sqrtl(<py_float> ({gen_for_each_dim('d{dim} * d{dim}', _Dims_, join=' + ')}))"
 
     #<IGNORE_NEXT>
     # noinspection PyTypeChecker
-    def distance_sqr_to(self, _VecClassName_ other, /) -> float:
+    def distance_sqr_to(self, _VecClassName_ other, /) -> py_float:
         #<GEN>: gen_for_each_dim("cdef _vTypeC_ d{dim} = self.{dim} - other.{dim}", _Dims_)
-        return #<GEN>: f"<double> ({gen_for_each_dim('d{dim} * d{dim}', _Dims_, join=' + ')})"
+        return #<GEN>: f"<py_float> ({gen_for_each_dim('d{dim} * d{dim}', _Dims_, join=' + ')})"
     #<IF>: _vType_ is float
 
     @property
     def normalized(self) -> _VecClassName_:
-        cdef double l = #<GEN>: f"sqrt({gen_for_each_dim('self.{dim} * self.{dim}', _Dims_, join=' + ')})"
+        cdef py_float l = #<GEN>: f"sqrtl({gen_for_each_dim('self.{dim} * self.{dim}', _Dims_, join=' + ')})"
         cdef _VecClassName_ vec = _VecClassName_.__new__(_VecClassName_)
         #<GEN>: gen_for_each_dim("vec.{dim} = self.{dim} / l", _Dims_)
         return vec

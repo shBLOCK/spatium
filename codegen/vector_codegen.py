@@ -12,9 +12,9 @@ SPECIAL_SWIZS = ("o", "l")
 
 def get_c_type(vtype: Type) -> str:
     if vtype is float:
-        return f"double"
+        return f"py_float"
     elif vtype is int:
-        return f"long"
+        return f"py_int"
     else:
         assert False
 
@@ -153,9 +153,10 @@ def gen_swizzle_properties(dims: int, vtype: Type) -> str:
 
 def gen_for_each_dim(template: str, dims: int, join="\n") -> str:
     out = ""
-    for dim in range(dims):
+    for i, dim in enumerate(range(dims)):
         out += template.format_map({
-            "dim": DIMS[dim]
+            "dim": DIMS[dim],
+            "index": i
         })
         if dim != dims - 1:
             out += join
