@@ -367,18 +367,22 @@ cdef class Transform3D:
         return t
 
     def __imatmul__(self, Transform3D other) -> Transform3D:
-        self.xx = other.tdotx(self.xx, self.xy, self.xz)
-        self.xy = other.tdoty(self.xx, self.xy, self.xz)
-        self.xz = other.tdotz(self.xx, self.xy, self.xz)
-        self.yx = other.tdotx(self.yx, self.yy, self.yz)
-        self.yy = other.tdoty(self.yx, self.yy, self.yz)
-        self.yz = other.tdotz(self.yx, self.yy, self.yz)
-        self.zx = other.tdotx(self.zx, self.zy, self.zz)
-        self.zy = other.tdoty(self.zx, self.zy, self.zz)
-        self.zz = other.tdotz(self.zx, self.zy, self.zz)
-        self.ox = other.mulx(self.ox, self.oy, self.oz)
-        self.oy = other.muly(self.ox, self.oy, self.oz)
-        self.oz = other.mulz(self.ox, self.oy, self.oz)
+        cdef py_float xx = other.tdotx(self.xx, self.xy, self.xz)
+        cdef py_float xy = other.tdoty(self.xx, self.xy, self.xz)
+        cdef py_float xz = other.tdotz(self.xx, self.xy, self.xz)
+        cdef py_float yx = other.tdotx(self.yx, self.yy, self.yz)
+        cdef py_float yy = other.tdoty(self.yx, self.yy, self.yz)
+        cdef py_float yz = other.tdotz(self.yx, self.yy, self.yz)
+        cdef py_float zx = other.tdotx(self.zx, self.zy, self.zz)
+        cdef py_float zy = other.tdoty(self.zx, self.zy, self.zz)
+        cdef py_float zz = other.tdotz(self.zx, self.zy, self.zz)
+        cdef py_float ox = other.mulx(self.ox, self.oy, self.oz)
+        cdef py_float oy = other.muly(self.ox, self.oy, self.oz)
+        cdef py_float oz = other.mulz(self.ox, self.oy, self.oz)
+        self.xx, self.xy, self.xz = xx, xy, xz
+        self.yx, self.yy, self.yz = yx, yy, yz
+        self.zx, self.zy, self.zz = zx, zy, zz
+        self.ox, self.oy, self.oz = ox, oy, oz
         return self
 
     cdef inline py_float _determinant(self) noexcept:
@@ -424,7 +428,7 @@ cdef class Transform3D:
         return t
 
     def rotate_ip(self, Vec3 axis, py_float angle, /) -> Transform3D:
-        self.__imul__(Transform3D.rotating(axis, angle))
+        self.__imatmul__(Transform3D.rotating(axis, angle))
         return self
 
     def rotated(self, Vec3 axis, py_float angle, /) -> Transform3D:
