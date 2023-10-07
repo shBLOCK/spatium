@@ -71,6 +71,13 @@ def test_matmul():
     assert (t1 @ t2).is_close(ans)
     assert t1(t2).is_close(ans)
 
+def test_imatmul():
+    t1 = Transform2D(1, 2, 3, 4, 5, 6)
+    t2 = Transform2D(3, 1, 2, 6, 5, 4)
+    t3 = Transform2D(t1)
+    t3 @= t2
+    assert t2 @ t1 == t3
+
 def test_determinant():
     assert isclose(Transform2D(1.6, 2.5, 3.4, 4.3, 5.2, 6.1).determinant, -1.62)
 

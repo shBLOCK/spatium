@@ -70,6 +70,13 @@ def test_matmul():
     assert (t1 @ t2).is_close(ans)
     assert t1(t2).is_close(ans)
 
+def test_imatmul():
+    t1 = Transform3D(*range(1, 13))
+    t2 = Transform3D(10, 8, 4, 6, 12, 7, 5, 3, 2, 1, 11, 9)
+    t3 = Transform3D(t1)
+    t3 @= t2
+    assert t2 @ t1 == t3
+
 def test_determinant():
     assert isclose(Transform3D(1.12, 2.11, 0, 0, 5.8, 6.7, 7.6, 8.5, 0, 1, 2, 3).determinant, 43.6572)
 

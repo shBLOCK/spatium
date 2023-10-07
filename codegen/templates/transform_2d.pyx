@@ -246,12 +246,15 @@ cdef class Transform2D:
         return t
 
     def __imatmul__(self, Transform2D other) -> Transform2D:
-        self.xx = other.tdotx(self.xx, self.xy)
-        self.xy = other.tdoty(self.xx, self.xy)
-        self.yx = other.tdotx(self.yx, self.yy)
-        self.yy = other.tdoty(self.yx, self.yy)
-        self.ox = other.mulx(self.ox, self.oy)
-        self.oy = other.muly(self.ox, self.oy)
+        cdef py_float xx = other.tdotx(self.xx, self.xy)
+        cdef py_float xy = other.tdoty(self.xx, self.xy)
+        cdef py_float yx = other.tdotx(self.yx, self.yy)
+        cdef py_float yy = other.tdoty(self.yx, self.yy)
+        cdef py_float ox = other.mulx(self.ox, self.oy)
+        cdef py_float oy = other.muly(self.ox, self.oy)
+        self.xx, self.xy = xx, xy
+        self.yx, self.yy = yx, yy
+        self.ox, self.oy = ox, oy
         return self
 
     cdef inline py_float _determinant(self) noexcept:
@@ -343,7 +346,7 @@ cdef class Transform2D:
         return t
 
     def rotate_ip(self, py_float rotation, /) -> Transform2D:
-        self.__imul__(Transform2D.rotation(rotation))
+        self.__imatmul__(Transform2D.rotation(rotation))
         return self
 
     def rotated(self, py_float rotation, /) -> Transform2D:
