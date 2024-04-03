@@ -82,7 +82,7 @@ cdef class Transform2D:
             t.ox, t.oy = origin.x, origin.y
         return t
 
-    cdef inline Transform2D copy(self) noexcept:
+    cdef inline Transform2D copy(self):
         cdef Transform2D t = Transform2D.__new__(Transform2D)
         t.xx = self.xx
         t.xy = self.xy
@@ -216,14 +216,14 @@ cdef class Transform2D:
         return vec
 
     #<OVERLOAD>
-    cdef Vec2 __call__(self, Vec2 other) noexcept:
+    cdef Vec2 __call__(self, Vec2 other):
         cdef Vec2 vec = Vec2.__new__(Vec2)
         vec.x = self.mulx(other.x, other.y)
         vec.y = self.muly(other.x, other.y)
         return vec
 
     #<OVERLOAD>
-    cdef Transform2D __call__(self, Transform2D other) noexcept:
+    cdef Transform2D __call__(self, Transform2D other):
         cdef Transform2D t = Transform2D.__new__(Transform2D)
         t.xx = self.tdotx(other.xx, other.xy)
         t.xy = self.tdoty(other.xx, other.xy)

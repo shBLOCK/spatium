@@ -129,7 +129,7 @@ cdef class Transform3D:
 
         return t
 
-    cdef inline Transform3D copy(self) noexcept:
+    cdef inline Transform3D copy(self):
         cdef Transform3D t = Transform3D.__new__(Transform3D)
         t.xx = self.xx
         t.xy = self.xy
@@ -324,7 +324,7 @@ cdef class Transform3D:
         return vec
 
     #<OVERLOAD>
-    cdef Vec3 __call__(self, Vec3 other) noexcept:
+    cdef Vec3 __call__(self, Vec3 other):
         cdef Vec3 vec = Vec3.__new__(Vec3)
         vec.x = self.mulx(other.x, other.y, other.z)
         vec.y = self.muly(other.x, other.y, other.z)
@@ -332,7 +332,7 @@ cdef class Transform3D:
         return vec
 
     #<OVERLOAD>
-    cdef Transform3D __call__(self, Transform3D other) noexcept:
+    cdef Transform3D __call__(self, Transform3D other):
         cdef Transform3D t = Transform3D.__new__(Transform3D)
         t.xx = self.tdotx(other.xx, other.xy, other.xz)
         t.xy = self.tdoty(other.xx, other.xy, other.xz)
