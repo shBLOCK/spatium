@@ -11,7 +11,7 @@ setup(
     ],
     packages=find_packages(
         where="src",
-        exclude=["tests"]
+        exclude=["tests", "gdmath/*.c", "gdmath/*.cpp"]
     ),
     package_dir={'': 'src'},
 )

@@ -15,11 +15,13 @@ cdef _VecClassName_ ___OpName___(self, _vTypeC_ other):
 
 #<OVERLOAD>
 cdef _VecClassName_ __i_OpName___(self, _VecClassName_ other):
+    #<RETURN_SELF>
     #<GEN>: gen_for_each_dim("self.{dim} _Op_= other.{dim}", _Dims_)
     return self
 
 #<OVERLOAD>
 cdef _VecClassName_ __i_OpName___(self, _vTypeC_ other):
+    #<RETURN_SELF>
     #<GEN>: gen_for_each_dim("self.{dim} _Op_= other", _Dims_)
     return self
 

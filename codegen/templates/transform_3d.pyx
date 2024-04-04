@@ -367,6 +367,7 @@ cdef class Transform3D:
         return t
 
     def __imatmul__(self, Transform3D other) -> Transform3D:
+        #<RETURN_SELF>
         cdef py_float xx = other.tdotx(self.xx, self.xy, self.xz)
         cdef py_float xy = other.tdoty(self.xx, self.xy, self.xz)
         cdef py_float xz = other.tdotz(self.xx, self.xy, self.xz)
@@ -417,6 +418,7 @@ cdef class Transform3D:
         return t
 
     def translate_ip(self, Vec3 translation, /) -> Transform3D:
+        #<RETURN_SELF>
         self.ox += translation.x
         self.oy += translation.y
         self.oz += translation.z
@@ -428,6 +430,7 @@ cdef class Transform3D:
         return t
 
     def rotate_ip(self, Vec3 axis, py_float angle, /) -> Transform3D:
+        #<RETURN_SELF>
         self.__imatmul__(Transform3D.rotating(axis, angle))
         return self
 
@@ -437,6 +440,7 @@ cdef class Transform3D:
         return t
 
     def scale_ip(self, Vec3 scale, /) -> Transform3D:
+        #<RETURN_SELF>
         self.xx *= scale.x
         self.yx *= scale.x
         self.zx *= scale.x

@@ -16,6 +16,7 @@ ctypedef Transform3D
 
 
 #<TEMPLATE_BEGIN>
+# noinspection SpellCheckingInspection
 @cython.auto_pickle(True)
 @cython.freelist(4096)
 @cython.no_gc
@@ -206,6 +207,7 @@ cdef class __VecClassName_iterator:
         pass  #<IGNORE>
 
     def __iter__(self) -> __VecClassName_iterator:
+        #<RETURN_SELF>
         return self
 
     def __length_hint__(self) -> int:

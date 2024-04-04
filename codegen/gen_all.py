@@ -4,10 +4,12 @@ import vector_codegen
 
 if __name__ == '__main__':
     codegen.step_generate("_gdmath.pyx", write_file=True, _globals=globals())
+    codegen.step_gen_stub("_gdmath.pyx", "_gdmath.pyi")
 
     import os
     if os.getenv("CI") != "true":
         codegen.step_move_to_dest("../src/gdmath/", "_gdmath", ".pyx")
+        codegen.step_move_to_dest("../src/gdmath/", "_gdmath", ".pyi")
 
         import sys
         import subprocess

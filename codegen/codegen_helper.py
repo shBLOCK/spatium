@@ -352,18 +352,18 @@ def process_overloads(file: str) -> str:
         if is_overload_func:
             is_overload_func = False
             m = regex.search(
-                r"cdef\s*"
+                r"cdef\s+"
                 r"(?P<return>\w+)?\s+"
                 r"(?P<name>\w+)\s*"
                 r"\("
-                r"\s*(?:(?P<first_param>\w+\s+\w+|self)(?:\s*,\s*(?P<remaining_params>\w+\s+\w+))*)?\s*"
+                r"\s*(?:(?P<params>\w+\s+\w+|self)(?:\s*,\s*(?P<params>\w+\s+\w+))*)?\s*"
                 r"\)",
                 line
             )
             assert m is not None, line
             name = m.group("name")
             c_ret = m.group("return")
-            c_params = (*m.captures("first_param"), *m.captures("remaining_params"))
+            c_params = tuple(m.captures("params"))
             c_params = tuple(regex.match(r"\w+", p).group() for p in c_params)
             if name not in overloads:
                 overloads[name] = _Overload(name)
@@ -425,6 +425,16 @@ def step_generate(template_file: str, output_file: str = None, write_file: bool 
             output.write(result)
     else:
         return result
+
+
+def step_gen_stub(source_file: str, output_file: str):
+    import stub_generator
+    source = open(f"output/{source_file}", encoding="utf8").read()
+    t = time.perf_counter()
+    result = stub_generator.gen_stub(source)
+    print(f"Step Gen Stub: {source_file} -> {output_file} completed in {time.perf_counter() - t:.3f}s")
+    with open(f"output/{output_file}", "w", encoding="utf8") as output:
+        output.write(result)
 
 
 def step_cythonize(file: str):

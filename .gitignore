@@ -8,4 +8,5 @@
 /src/gdmath/*.cpp
 /src/gdmath/*.pyd
 /src/gdmath/_gdmath.pyx
+/src/gdmath/_gdmath.pyi
 /codegen/output/*

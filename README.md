@@ -17,6 +17,7 @@
   - Transform
     - [Transform2D](https://github.com/shBLOCK/GdMath/wiki#transform2d) & [Transform3D](https://github.com/shBLOCK/GdMath/wiki#transform3d)
     - Godot and GLSL like api
+- Stubs for better IDE support
 
 Please refer to the [wiki](https://github.com/shBLOCK/GdMath/wiki) for more details
 

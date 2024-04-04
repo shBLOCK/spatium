@@ -246,6 +246,7 @@ cdef class Transform2D:
         return t
 
     def __imatmul__(self, Transform2D other) -> Transform2D:
+        #<RETURN_SELF>
         cdef py_float xx = other.tdotx(self.xx, self.xy)
         cdef py_float xy = other.tdoty(self.xx, self.xy)
         cdef py_float yx = other.tdotx(self.yx, self.yy)
@@ -336,6 +337,7 @@ cdef class Transform2D:
 
 
     def translate_ip(self, Vec2 translation, /) -> Transform2D:
+        #<RETURN_SELF>
         self.ox = translation.x
         self.oy = translation.y
         return self
@@ -346,6 +348,7 @@ cdef class Transform2D:
         return t
 
     def rotate_ip(self, py_float rotation, /) -> Transform2D:
+        #<RETURN_SELF>
         self.__imatmul__(Transform2D.rotation(rotation))
         return self
 
@@ -355,6 +358,7 @@ cdef class Transform2D:
         return t
 
     def scale_ip(self, Vec2 scale, /) -> Transform2D:
+        #<RETURN_SELF>
         self.xx *= scale.x
         self.xy *= scale.y
         self.yx *= scale.x
