@@ -86,7 +86,7 @@ class StubClass:
             return src
 
         stub = [
-            "# noinspection SpellCheckingInspection"
+            "# noinspection SpellCheckingInspection",
             f"class {self.name}:"
         ]
 
