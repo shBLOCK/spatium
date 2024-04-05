@@ -5,7 +5,8 @@
 [![Release](https://github.com/shBLOCK/GdMath/actions/workflows/release.yml/badge.svg)](https://github.com/shBLOCK/GdMath/actions/workflows/release.yml)
 
 ## Main features
-- Pure Cython implementation (~30x speedup from pure python on average)
+- Fast Pure Cython Implementation
+  - ~20x speedup from pure python(3.12) impl on average
   - Based on custom code generation
 - Spatial Math
   - [Vector](https://github.com/shBLOCK/GdMath/wiki#vectors)
@@ -21,6 +22,9 @@
 - Stubs for better IDE support
 
 Please refer to the [wiki](https://github.com/shBLOCK/GdMath/wiki) for more details
+
+## Benchmark
+[![Benchmark Results](https://github.com/shBLOCK/GdMath/tree/master/benchmark/chart.png)](https://github.com/shBLOCK/GdMath/tree/master/benchmark/chart.png)
 
 ## Implementation details
 - **Codegen!**  
