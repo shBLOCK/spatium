@@ -1,6 +1,7 @@
 include src/gdmath/*.c
 include src/gdmath/*.pyd
 include src/gdmath/*.so
+exclude src/gdmath/README.md
 recursive-exclude tests *
 recursive-exclude codegen *
 prune */__pycache__
