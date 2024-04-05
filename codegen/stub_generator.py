@@ -3,7 +3,6 @@ from typing import Sequence, Optional
 
 import regex
 
-#TODO: docstring
 
 def convert_type(org: str) -> str:
     types = []
@@ -26,22 +25,29 @@ class StubProperty:
         self.name = name
         self.type = ptype
         self.mutable = mutable
+        self.getter_doc = []
+        self.setter_doc = []
 
     def stub(self) -> list[str]:
-        # if self.mutable:
-        #     return [f"{self.name}: {self.type}"]
-        # else:
-        #     return [
-        #         "@property",
-        #         f"def {self.name}(self) -> {self.type}: ..."
-        #     ]
         stub = [
             "@property",
-            f"def {self.name}(self) -> {self.type}: ..."
+            f"def {self.name}(self) -> {self.type}:"
         ]
+        if self.getter_doc:
+            stub.extend(self.getter_doc)
+            stub.append("    ...")
+        else:
+            stub[-1] += " ..."
+
         if self.mutable:
             stub.append(f"@{self.name}.setter")
-            stub.append(f"def {self.name}(self, value: {self.type}) -> None: ...")
+            stub.append(f"def {self.name}(self, value: {self.type}) -> None:")
+            if self.setter_doc:
+                stub.extend(self.setter_doc)
+                stub.append("    ...")
+            else:
+                stub[-1] += " ..."
+
         return stub
 
 
@@ -68,6 +74,7 @@ class StubMethod:
         self.params = params
         self.is_cdef = is_cdef
         self.is_static = is_static
+        self.docstring = []
 
     def stub(self, name_override: Optional[str] = None) -> list[str]:
         stub = []
@@ -81,7 +88,13 @@ class StubMethod:
             else:
                 param_list.append(p.stub())
 
-        stub.append(f"def {name_override or self.name}({', '.join(param_list)}) -> {self.rtype}: ...")
+        stub.append(f"def {name_override or self.name}({', '.join(param_list)}) -> {self.rtype}:")
+        if self.docstring:
+            stub.extend(self.docstring)
+            stub.append("    ...")
+        else:
+            stub[-1] += " ..."
+
         return stub
 
 class StubClass:
@@ -89,17 +102,21 @@ class StubClass:
         self.name = name
         self.properties: dict[str, StubProperty] = {}
         self.methods: dict[str, StubMethod] = {}
+        self.docstring = []
 
     def stub(self) -> list[str]:
         def indent(src: list[str]) -> list[str]:
             for i, line in enumerate(src):
-                src[i] = " " * 4 + line
+                src[i] = "    " + line
             return src
 
         stub = [
             "# noinspection SpellCheckingInspection",
             f"class {self.name}:"
         ]
+        if self.docstring:
+            stub.extend(indent(self.docstring))
+            stub.append("")
 
         for prop in self.properties.values():
             stub.extend(indent(prop.stub()))
@@ -132,22 +149,43 @@ def gen_stub(source: str) -> str:
     const_mapping = {}
     decorators = []
     classes = []
-    clazz = None
+    current_class = None
+
+    in_docstring = False
+    docstring_dest: Optional[list[str]] = None
+    def add_docstring_line(doc_line: str):
+        assert docstring_dest is not None
+        docstring_dest.append(doc_line[4:]) # remove one indent level
 
     print("gen_stub: reading source...")
     source_lines = source.splitlines(keepends=False)
     for line_no, line in enumerate(source_lines):
+        # Docstring
+        if in_docstring:
+            add_docstring_line(line)
+            if line.strip().endswith('"""'):
+                in_docstring = False
+            continue
+        elif line.strip().startswith('"""'):
+            in_docstring = True
+            add_docstring_line(line)
+            if len(line.strip()) >= 6 and line.strip().endswith('"""'):
+                in_docstring = False
+            continue
+
         # Class
         if m := regex.match(r"cdef\s+class\s+(?P<name>\w+)\s*:", line):
-            if clazz is not None:
-                classes.append(clazz)
-            clazz = StubClass(m.group("name"))
+            if current_class is not None:
+                classes.append(current_class)
+            current_class = StubClass(m.group("name"))
+            docstring_dest = current_class.docstring
             decorators.clear()
         # Property
         elif m := regex.match(r"\s+cdef\s+public\s+(?P<type>\w+)\s+(?P<names>\w+)(?:\s*,\s*(?P<names>\w+))*", line):
             ptype = convert_type(m.group("type"))
             for pname in m.captures("names"):
-                clazz.properties[pname] = StubProperty(pname, ptype)
+                current_class.properties[pname] = StubProperty(pname, ptype)
+            docstring_dest = None
             decorators.clear()
         # Method (including @property)
         elif (
@@ -184,13 +222,16 @@ def gen_stub(source: str) -> str:
             assert "classmethod" not in decorators
             # property getter
             if "property" in decorators:
-                assert name not in clazz.properties
-                clazz.properties[name] = StubProperty(name, convert_type(m.group("return")), mutable=False)
+                assert name not in current_class.properties
+                current_class.properties[name] = prop = StubProperty(name, convert_type(m.group("return")), mutable=False)
+                docstring_dest = prop.getter_doc
             # proeprty setter
             elif setter_dec := [d for d in decorators if d.endswith(".setter")]:
                 assert len(setter_dec) == 1
                 pname = setter_dec[0].split(".")[0]
-                clazz.properties[pname].mutable = True
+                prop = current_class.properties[pname]
+                prop.mutable = True
+                docstring_dest = prop.setter_doc
             # normal method
             else:
                 rtype = convert_type(m.group("return") or "object")
@@ -212,13 +253,14 @@ def gen_stub(source: str) -> str:
                         assert pm is not None
                         params.append(StubMethod.Param(pm.group("name"), convert_type(pm.group("type")), pm.group("default"), const_mapping=const_mapping))
 
-                clazz.methods[name] = StubMethod(
+                current_class.methods[name] = method = StubMethod(
                     name,
                     rtype,
                     params,
                     is_cdef,
                     is_static="staticmethod" in decorators
                 )
+                docstring_dest = method.docstring
 
             decorators.clear()
         # Decorator
@@ -232,8 +274,8 @@ def gen_stub(source: str) -> str:
             #     print(f"Warning: ignored def or cdef line: {line}")
             pass
 
-    if clazz is not None:
-        classes.append(clazz)
+    if current_class is not None:
+        classes.append(current_class)
 
     out_lines = [
         "from typing import overload, Self, Any, Union",
