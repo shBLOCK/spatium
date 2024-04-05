@@ -3,6 +3,8 @@ from typing import Sequence, Optional
 
 import regex
 
+#TODO: docstring
+
 def convert_type(org: str) -> str:
     types = []
     for raw in map(str.strip, org.split("|")):
@@ -26,13 +28,22 @@ class StubProperty:
         self.mutable = mutable
 
     def stub(self) -> list[str]:
+        # if self.mutable:
+        #     return [f"{self.name}: {self.type}"]
+        # else:
+        #     return [
+        #         "@property",
+        #         f"def {self.name}(self) -> {self.type}: ..."
+        #     ]
+        stub = [
+            "@property",
+            f"def {self.name}(self) -> {self.type}: ..."
+        ]
         if self.mutable:
-            return [f"{self.name}: {self.type}"]
-        else:
-            return [
-                "@property",
-                f"def {self.name}(self) -> {self.type}: ..."
-            ]
+            stub.append(f"@{self.name}.setter")
+            stub.append(f"def {self.name}(self, value: {self.type}) -> None: ...")
+        return stub
+
 
 class StubMethod:
     class Param:
