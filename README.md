@@ -16,6 +16,7 @@
     - Works with other libraries (pygame, numpy, ...)
   - Transform
     - [Transform2D](https://github.com/shBLOCK/GdMath/wiki#transform2d) & [Transform3D](https://github.com/shBLOCK/GdMath/wiki#transform3d)
+- All floats are double-precision
 - Full pythonic interface & GLSL-like API
 - Stubs for better IDE support
 
