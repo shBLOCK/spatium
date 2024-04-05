@@ -24,7 +24,7 @@
 Please refer to the [wiki](https://github.com/shBLOCK/GdMath/wiki) for more details
 
 ## Benchmark
-[![Benchmark Results](https://github.com/shBLOCK/GdMath/tree/master/benchmark/chart.png)](https://github.com/shBLOCK/GdMath/tree/master/benchmark/chart.png)
+[![Benchmark Results](https://github.com/shBLOCK/GdMath/raw/master/benchmark/chart.png)](https://github.com/shBLOCK/GdMath/tree/master/benchmark/chart.png)
 
 ## Implementation details
 - **Codegen!**  
