@@ -13,7 +13,11 @@ ctypedef Vec3i
 ctypedef Vec4i
 ctypedef Transform2D
 ctypedef Transform3D
+ctypedef py_int
+ctypedef py_float
 
+DEF DEFAULT_RELATIVE_TOLERANCE = 0 # Dummy Value
+DEF DEFAULT_ABSOLUTE_TOLERANCE = 0 # Dummy Value
 
 #<TEMPLATE_BEGIN>
 # noinspection SpellCheckingInspection

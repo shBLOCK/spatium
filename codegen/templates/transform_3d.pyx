@@ -1,5 +1,7 @@
 cimport cython
 
+# Dummy types for the IDE
+ctypedef py_float
 cdef class Vec3:
     cdef py_float x, y, z
 

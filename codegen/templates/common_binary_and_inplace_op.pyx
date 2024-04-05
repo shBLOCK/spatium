@@ -1,3 +1,8 @@
+# Dummy types for the IDE
+cdef class _VecClassName_:
+    pass
+ctypedef _vTypeC_
+
 #<TEMPLATE_BEGIN>
 #<OVERLOAD>
 cdef _VecClassName_ ___OpName___(self, _VecClassName_ other):
