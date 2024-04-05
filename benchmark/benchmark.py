@@ -1,3 +1,4 @@
+import sys
 import timeit
 import enum
 from collections import OrderedDict
@@ -5,6 +6,16 @@ from numerize.numerize import numerize
 
 # Get rid of pygame import message
 import pygame
+
+import platform
+if platform.system() == "Windows":
+    import psutil
+    import os
+    psutil.Process(os.getpid()).nice(psutil.REALTIME_PRIORITY_CLASS)
+    print("Setting process priority to realtime class!")
+else:
+    print("Warning: Not on windows, not setting process priority!", file=sys.stderr)
+
 print()
 
 class Subject(enum.Enum):
