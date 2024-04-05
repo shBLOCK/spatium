@@ -7,16 +7,16 @@
 ## Main features
 - Pure Cython implementation (~30x speedup from pure python on average)
   - Based on custom code generation
-- Linear Algebra
+- Spatial Math
   - [Vector](https://github.com/shBLOCK/GdMath/wiki#vectors)
-    - Pythonic and GLSL-like API
     - Operators +, -, *, /, @(dot), ^(cross), |(distance) ...
     - Fast (compile time) swizzling (e.g. `Vec3(1, 2, 3).zxy`)
     - Flexible constructor (e.g. `Vec3(Vec2(1, 2), 3)`)
     - Iterating and unpacking (e.g. `x, y, z = Vec3(1, 2, 3)`)
+    - Works with other libraries (pygame, numpy, ...)
   - Transform
     - [Transform2D](https://github.com/shBLOCK/GdMath/wiki#transform2d) & [Transform3D](https://github.com/shBLOCK/GdMath/wiki#transform3d)
-    - Pythonic and GLSL-like API
+- Full pythonic interface & GLSL-like API
 - Stubs for better IDE support
 
 Please refer to the [wiki](https://github.com/shBLOCK/GdMath/wiki) for more details
