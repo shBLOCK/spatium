@@ -39,8 +39,10 @@ def gen_single_value_constructor(dims: int, value: Any) -> str:
 def gen_type_conversion_constructor(dims: int, vtype: Type) -> str:
     assert vtype is int or vtype is float
     from_type = float if vtype is int else int
+    type_str = {int: "integer", float: "floating-point"}
     out = "#<OVERLOAD>\n"
     out += f"cdef void __init__(self, {get_vec_class_name(dims, from_type)} vec) noexcept:\n"
+    out += f'    """Convert a {type_str[from_type]} vector to a {type_str[vtype]} vector."""\n'
     for dim in DIMS[:dims]:
         out += f"    self.{dim} = <{get_c_type(vtype)}>vec.{dim}\n"
     return out
@@ -83,6 +85,19 @@ def gen_combination_constructors(dims: int, vtype: Type) -> str:
         func = "#<OVERLOAD>\n"
         func += (f"cdef void __init__(self, "
                  f"{', '.join(f'{t} {n}' for t, n in zip(param_types, param_names))}) noexcept:\n")
+
+        docstring = f"Create a {dims}D vector from "
+        for i, param_dims in enumerate(combination):
+            if i == 0:
+                docstring += "a "
+            elif i == len(combination) - 1:
+                docstring += " and a "
+            else:
+                docstring += ", a "
+            docstring += f"{param_dims}D vector" if param_dims > 1 else "number"
+        docstring += "."
+        func += f'    """{docstring}"""\n'
+
         for assign in assigns:
             func += f"    {assign}\n"
         func = func[:-1]  # remove last \n
@@ -104,6 +119,27 @@ def _gen_swizzle_get(swizzle: str, vtype: Type) -> str:
     vec_cls = get_vec_class_name(len(swizzle), vtype)
     out += f"def {swizzle}(self) -> {vec_cls}:\n"
     out += f"    cdef {vec_cls} vec = {vec_cls}.__new__({vec_cls})\n"
+
+    docstring = f"Create a `{vec_cls}` with its elements being "
+    for i, swiz in enumerate(swizzle):
+        if i == 0:
+            pass
+        elif i == len(swizzle) - 1:
+            docstring += ", and "
+        else:
+            docstring += ", "
+
+        if swiz in DIMS:
+            docstring += f"the {swiz.upper()} element of this vector"
+        elif swiz == "o":
+            docstring += f"a zero"
+        elif swiz == "l":
+            docstring += f"a one"
+        else:
+            assert False
+    docstring += "."
+    out += f'    """{docstring}"""\n'
+
     for i, swiz in enumerate(swizzle):
         if swiz in DIMS:
             val = f"self.{swiz}"
@@ -121,6 +157,12 @@ def _gen_swizzle_get(swizzle: str, vtype: Type) -> str:
 def _gen_swizzle_set(swizzle: str, vtype: Type):
     out = f"@{swizzle}.setter\n"
     out += f"def {swizzle}(self, {get_vec_class_name(len(swizzle), vtype)} vec) -> None:\n"
+
+    docstring = f"Set the value of the {', '.join(swizzle.upper())}"
+    docstring = docstring[:-3] + " and " + docstring[-1]
+    docstring += " elements of this vector to the value of the elements of the other vector, respectively."
+    out += f'    """{docstring}"""\n'
+
     for i, swiz in enumerate(swizzle):
         assert swiz in DIMS
         out += f"    self.{swiz} = vec.{DIMS[i]}\n"
@@ -174,8 +216,8 @@ def gen_repr(dims: int, vtype: Type) -> str:
     out += ')"'
     return out
 
-def gen_common_binary_and_inplace_op(op: str, name: str) -> str:
-    return from_template(open("templates/common_binary_and_inplace_op.pyx").read(), {"Op": op, "OpName": name})
+def gen_common_binary_and_inplace_op(op: str, name: str, readable_name: str) -> str:
+    return from_template(open("templates/common_binary_and_inplace_op.pyx").read(), {"Op": op, "OpName": name, "OpReadableName": readable_name})
 
 def gen_item_op(dims: int, op: str) -> str:
     out = ""

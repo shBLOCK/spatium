@@ -2,6 +2,7 @@ cimport cython
 
 # Dummy types for the IDE
 ctypedef py_float
+ctypedef py_int
 cdef class Vec3:
     cdef py_float x, y, z
 
@@ -15,10 +16,13 @@ from libc.math cimport sinl, cosl
 @cython.no_gc
 @cython.final
 cdef class Transform3D:
+    """3D linear transformation (3*4 matrix)."""
+
     cdef py_float xx, xy, xz
     cdef py_float yx, yy, yz
     cdef py_float zx, zy, zz
     cdef py_float ox, oy, oz
+
 
     cdef inline void identity(self) noexcept:
         self.xx, self.xy, self.xz = 1.0, 0.0, 0.0
@@ -28,10 +32,12 @@ cdef class Transform3D:
 
     #<OVERLOAD>
     cdef void __init__(self) noexcept:
+        """Create an identity transform."""
         self.identity()
 
     #<OVERLOAD>
     cdef void __init__(self, py_float xx, py_float xy, py_float xz, py_float yx, py_float yy, py_float yz, py_float zx, py_float zy, py_float zz, py_float ox, py_float oy, py_float oz) noexcept:
+        """Create a transform from all the matrix elements."""
         self.xx = xx
         self.xy = xy
         self.xz = xz
@@ -47,6 +53,7 @@ cdef class Transform3D:
 
     #<OVERLOAD>
     cdef void __init__(self, Vec3 x, Vec3 y, Vec3 z, Vec3 origin) noexcept:
+        """Create a transform using three base vectors and the origin vector."""
         self.xx, self.xy, self.xz = x.x, x.y, x.z
         self.yx, self.yy, self.yz = y.x, y.y, y.z
         self.zx, self.zy, self.zz = z.x, z.y, z.z
@@ -54,6 +61,7 @@ cdef class Transform3D:
 
     #<OVERLOAD>
     cdef void __init__(self, Transform3D transform) noexcept:
+        """Create a copy."""
         self.xx = transform.xx
         self.xy = transform.xy
         self.xz = transform.xz
@@ -71,6 +79,7 @@ cdef class Transform3D:
 
     @staticmethod
     def translating(Vec3 translation, /) -> Transform3D:
+        """Create a translation transform."""
         cdef Transform3D t = Transform3D.__new__(Transform3D)
         t.identity()
         t.ox += translation.x
@@ -80,6 +89,7 @@ cdef class Transform3D:
 
     @staticmethod
     def rotating(Vec3 axis, py_float angle, /, Vec3 origin = None) -> Transform3D:
+        """Create a rotation transform."""
         cdef Transform3D trans = Transform3D.__new__(Transform3D)
 
         cdef py_float axis_x_sq = axis.x * axis.x
@@ -118,6 +128,7 @@ cdef class Transform3D:
 
     @staticmethod
     def scaling(Vec3 scale, /, Vec3 origin = None) -> Transform3D:
+        """Create a scale transform."""
         cdef Transform3D t = Transform3D.__new__(Transform3D)
         t.identity()
         t.xx = scale.x
@@ -151,6 +162,10 @@ cdef class Transform3D:
         return f"⎡X: ({self.xx}, {self.xy}, {self.xz})\n⎢Y: ({self.yx}, {self.yy}, {self.yz})\n⎢Z: ({self.zx}, {self.zy}, {self.zz})\n⎣O: ({self.ox}, {self.oy}, {self.oz})"
 
     def __eq__(self, object other) -> bool:
+        """Perform exact comparison.
+
+        See Also: `Transform3D.is_close()`
+        """
         if not isinstance(other, Transform3D):
             return False
         return self.xx == (<Transform3D> other).xx and self.xy == (<Transform3D> other).xy and self.xz == (<Transform3D> other).xz and\
@@ -159,6 +174,10 @@ cdef class Transform3D:
                self.ox == (<Transform3D> other).ox and self.oy == (<Transform3D> other).oy and self.oz == (<Transform3D> other).oz
 
     def __ne__(self, object other) -> bool:
+        """Perform exact comparison.
+
+        See Also: `Transform3D.is_close()`
+        """
         if not isinstance(other, Transform3D):
             return True
         return self.xx != (<Transform3D> other).xx or self.xy != (<Transform3D> other).xy or self.xz != (<Transform3D> other).xz or\
@@ -167,6 +186,10 @@ cdef class Transform3D:
                self.ox != (<Transform3D> other).ox or self.oy != (<Transform3D> other).oy or self.oz != (<Transform3D> other).oz
 
     def is_close(self, Transform3D other, /, py_float rel_tol = DEFAULT_RELATIVE_TOLERANCE, py_float abs_tol = DEFAULT_ABSOLUTE_TOLERANCE) -> bool:
+        """Determine if the two transforms are close enough.
+
+        See Also: `math.is_close()`
+        """
         return is_close(self.xx, other.xx, rel_tol, abs_tol) and \
                is_close(self.xy, other.xy, rel_tol, abs_tol) and \
                is_close(self.xz, other.xz, rel_tol, abs_tol) and \
@@ -199,6 +222,7 @@ cdef class Transform3D:
 
     @property
     def x(self) -> Vec3:
+        """Base vector X."""
         cdef Vec3 vec = Vec3.__new__(Vec3)
         vec.x = self.xx
         vec.y = self.xy
@@ -207,6 +231,7 @@ cdef class Transform3D:
 
     @property
     def y(self) -> Vec3:
+        """Base vector Y."""
         cdef Vec3 vec = Vec3.__new__(Vec3)
         vec.x = self.yx
         vec.y = self.yy
@@ -215,6 +240,7 @@ cdef class Transform3D:
 
     @property
     def z(self) -> Vec3:
+        """Base vector Z."""
         cdef Vec3 vec = Vec3.__new__(Vec3)
         vec.x = self.zx
         vec.y = self.zy
@@ -223,6 +249,7 @@ cdef class Transform3D:
 
     @property
     def origin(self) -> Vec3:
+        """Origin vector."""
         cdef Vec3 vec = Vec3.__new__(Vec3)
         vec.x = self.ox
         vec.y = self.oy
@@ -231,29 +258,40 @@ cdef class Transform3D:
 
     @x.setter
     def x(self, Vec3 value) -> None:
+        """Set the X base of the matrix."""
         self.xx = value.x
         self.xy = value.y
         self.xz = value.z
 
     @y.setter
     def y(self, Vec3 value) -> None:
+        """Set the Y base of the matrix."""
         self.yx = value.x
         self.yy = value.y
         self.yz = value.z
 
     @z.setter
     def z(self, Vec3 value) -> None:
+        """Set the Z base of the matrix."""
         self.zx = value.x
         self.zy = value.y
         self.zz = value.z
 
     @origin.setter
     def origin(self, Vec3 value) -> None:
+        """Set the origin."""
         self.ox = value.x
         self.oy = value.y
         self.oz = value.z
 
     def __getitem__(self, py_int item) -> Vec3:
+        """Get a column of the transformation matrix.
+
+        0: Base vector X
+        1: Base vector Y
+        2: Base vector Z
+        3: Origin vector
+        """
         cdef vec = Vec3.__new__(Vec3)
 
         if item == 0:
@@ -278,6 +316,13 @@ cdef class Transform3D:
         return vec
 
     def __setitem__(self, py_int key, Vec3 value) -> None:
+        """Set a column of the transformation matrix.
+
+        0: Base vector X
+        1: Base vector Y
+        2: Base vector Z
+        3: Origin vector
+        """
         if key == 0:
             self.xx = value.x
             self.xy = value.y
@@ -298,6 +343,7 @@ cdef class Transform3D:
             raise IndexError(key)
 
     def __len__(self) -> py_int:
+        """The amount of columns. Is always 4 for `Transform3D`s."""
         return 4
 
     cdef inline py_float tdotx(self, py_float x, py_float y, py_float z) noexcept:
@@ -319,6 +365,7 @@ cdef class Transform3D:
         return self.tdotz(x, y, z) + self.oz
 
     def __mul__(self, Vec3 other) -> Vec3:
+        """Transform a copy of the vector."""
         cdef Vec3 vec = Vec3.__new__(Vec3)
         vec.x = self.mulx(other.x, other.y, other.z)
         vec.y = self.muly(other.x, other.y, other.z)
@@ -327,6 +374,7 @@ cdef class Transform3D:
 
     #<OVERLOAD>
     cdef Vec3 __call__(self, Vec3 other):
+        """Transform a copy of the vector."""
         cdef Vec3 vec = Vec3.__new__(Vec3)
         vec.x = self.mulx(other.x, other.y, other.z)
         vec.y = self.muly(other.x, other.y, other.z)
@@ -335,6 +383,7 @@ cdef class Transform3D:
 
     #<OVERLOAD>
     cdef Transform3D __call__(self, Transform3D other):
+        """Transform a copy of the passed in `Transform3D`."""
         cdef Transform3D t = Transform3D.__new__(Transform3D)
         t.xx = self.tdotx(other.xx, other.xy, other.xz)
         t.xy = self.tdoty(other.xx, other.xy, other.xz)
@@ -353,6 +402,7 @@ cdef class Transform3D:
     #<OVERLOAD_DISPATCHER>:__call__
 
     def __matmul__(self, Transform3D other) -> Transform3D:
+        """Transform a copy of the `Transform3D` on the right."""
         cdef Transform3D t = Transform3D.__new__(Transform3D)
         t.xx = self.tdotx(other.xx, other.xy, other.xz)
         t.xy = self.tdoty(other.xx, other.xy, other.xz)
@@ -370,6 +420,7 @@ cdef class Transform3D:
 
     def __imatmul__(self, Transform3D other) -> Transform3D:
         #<RETURN_SELF>
+        """Transform this `Transform3D` inplace with the other `Transform2D`."""
         cdef py_float xx = other.tdotx(self.xx, self.xy, self.xz)
         cdef py_float xy = other.tdoty(self.xx, self.xy, self.xz)
         cdef py_float xz = other.tdotz(self.xx, self.xy, self.xz)
@@ -395,9 +446,11 @@ cdef class Transform3D:
 
     @property
     def determinant(self) -> py_float:
+        """Compute the determinant of the matrix."""
         return self._determinant()
 
     def __invert__(self) -> Transform3D:
+        """Get the invert transform."""
         cdef py_float cox = self.yy * self.zz - self.yz * self.zy
         cdef py_float coy = self.xz * self.zy - self.xy * self.zz
         cdef py_float coz = self.xy * self.yz - self.yy * self.xz
@@ -421,28 +474,33 @@ cdef class Transform3D:
 
     def translate_ip(self, Vec3 translation, /) -> Transform3D:
         #<RETURN_SELF>
+        """Apply translation to this transform inplace."""
         self.ox += translation.x
         self.oy += translation.y
         self.oz += translation.z
         return self
 
     def translated(self, Vec3 translation, /) -> Transform3D:
+        """Apply translation to a copy of this transform."""
         cdef Transform3D t = self.copy()
         t.translate_ip(translation)
         return t
 
     def rotate_ip(self, Vec3 axis, py_float angle, /) -> Transform3D:
         #<RETURN_SELF>
+        """Apply rotation to this transform inplace."""
         self.__imatmul__(Transform3D.rotating(axis, angle))
         return self
 
     def rotated(self, Vec3 axis, py_float angle, /) -> Transform3D:
+        """Apply rotation to a copy of this transform."""
         cdef Transform3D t = self.copy()
         t.rotate_ip(axis, angle)
         return t
 
     def scale_ip(self, Vec3 scale, /) -> Transform3D:
         #<RETURN_SELF>
+        """Apply scaling to this transform inplace."""
         self.xx *= scale.x
         self.yx *= scale.x
         self.zx *= scale.x
@@ -455,6 +513,7 @@ cdef class Transform3D:
         return self
 
     def scaled(self, Vec3 scale, /) -> Transform3D:
+        """Apply scaling to a copy of this transform."""
         cdef Transform3D t = self.copy()
         t.scale_ip(scale)
         return t

@@ -2,6 +2,7 @@ cimport cython
 
 # Dummy types for the IDE
 ctypedef py_float
+ctypedef py_int
 cdef class Vec2:
     cdef py_float x, y
 
@@ -15,6 +16,8 @@ from libc.math cimport atan2l, sinl, cosl, sqrtl, NAN
 @cython.no_gc
 @cython.final
 cdef class Transform2D:
+    """2D linear transformation (2*3 matrix)."""
+
     cdef py_float xx, xy
     cdef py_float yx, yy
     cdef py_float ox, oy
@@ -27,10 +30,12 @@ cdef class Transform2D:
 
     #<OVERLOAD>
     cdef void __init__(self) noexcept:
+        """Create an identity transform."""
         self.identity()
 
     #<OVERLOAD>
     cdef void __init__(self, py_float xx, py_float xy, py_float yx, py_float yy, py_float ox, py_float oy) noexcept:
+        """Create a transform from all the matrix elements."""
         self.xx = xx
         self.xy = xy
         self.yx = yx
@@ -40,12 +45,14 @@ cdef class Transform2D:
 
     #<OVERLOAD>
     cdef void __init__(self, Vec2 x, Vec2 y, Vec2 origin) noexcept:
+        """Create a transform using two base vectors and the origin vector."""
         self.xx, self.xy = x.x, x.y
         self.yx, self.yy = y.x, y.y
         self.ox, self.oy = origin.x, origin.y
 
     #<OVERLOAD>
     cdef void __init__(self, Transform2D transform) noexcept:
+        """Create a copy."""
         self.xx = transform.xx
         self.xy = transform.xy
         self.yx = transform.yx
@@ -57,6 +64,7 @@ cdef class Transform2D:
 
     @staticmethod
     def translating(Vec2 translation, /) -> Transform2D:
+        """Create a translation transform."""
         cdef Transform2D t = Transform2D.__new__(Transform2D)
         t.identity()
         t.ox, t.oy = translation.x, translation.y
@@ -64,6 +72,7 @@ cdef class Transform2D:
 
     @staticmethod
     def rotating(py_float rotation, /, Vec2 origin = None) -> Transform2D:
+        """Create a rotation transform."""
         cdef py_float c = cosl(rotation)
         cdef py_float s = sinl(rotation)
         cdef Transform2D t = Transform2D.__new__(Transform2D)
@@ -77,6 +86,7 @@ cdef class Transform2D:
 
     @staticmethod
     def scaling(Vec2 scale, /, Vec2 origin = None) -> Transform2D:
+        """Create a scale transform."""
         cdef Transform2D t = Transform2D.__new__(Transform2D)
         t.xx = scale.x
         t.yy = scale.y
@@ -98,6 +108,10 @@ cdef class Transform2D:
         return f"⎡X: ({self.xx}, {self.xy})\n⎢Y: ({self.yx}, {self.yy})\n⎣O: ({self.ox}, {self.oy})"
 
     def __eq__(self, object other) -> bool:
+        """Perform exact comparison.
+
+        See Also: `Transform2D.is_close()`
+        """
         if not isinstance(other, Transform2D):
             return False
         return self.xx == (<Transform2D> other).xx and self.xy == (<Transform2D> other).xy and\
@@ -105,6 +119,10 @@ cdef class Transform2D:
                self.ox == (<Transform2D> other).ox and self.oy == (<Transform2D> other).oy
 
     def __ne__(self, object other) -> bool:
+        """Perform exact comparison.
+
+        See Also: `Transform2D.is_close()`
+        """
         if not isinstance(other, Transform2D):
             return True
         return self.xx != (<Transform2D> other).xx or self.xy != (<Transform2D> other).xy or \
@@ -112,6 +130,10 @@ cdef class Transform2D:
                self.ox != (<Transform2D> other).ox or self.oy != (<Transform2D> other).oy
 
     def is_close(self, Transform2D other, /, py_float rel_tol = DEFAULT_RELATIVE_TOLERANCE, py_float abs_tol = DEFAULT_ABSOLUTE_TOLERANCE) -> bool:
+        """Determine if the two transforms are close enough.
+
+        See Also: `math.is_close()`
+        """
         return is_close(self.xx, other.xx, rel_tol, abs_tol) and \
                is_close(self.xy, other.xy, rel_tol, abs_tol) and \
                is_close(self.yx, other.yx, rel_tol, abs_tol) and \
@@ -132,6 +154,7 @@ cdef class Transform2D:
 
     @property
     def x(self) -> Vec2:
+        """Base vector X."""
         cdef Vec2 vec = Vec2.__new__(Vec2)
         vec.x = self.xx
         vec.y = self.xy
@@ -139,6 +162,7 @@ cdef class Transform2D:
 
     @property
     def y(self) -> Vec2:
+        """Base vector Y."""
         cdef Vec2 vec = Vec2.__new__(Vec2)
         vec.x = self.yx
         vec.y = self.yy
@@ -146,6 +170,7 @@ cdef class Transform2D:
 
     @property
     def origin(self) -> Vec2:
+        """Origin vector."""
         cdef Vec2 vec = Vec2.__new__(Vec2)
         vec.x = self.ox
         vec.y = self.oy
@@ -153,20 +178,29 @@ cdef class Transform2D:
 
     @x.setter
     def x(self, Vec2 value) -> None:
+        """Set the X base of the matrix."""
         self.xx = value.x
         self.xy = value.y
 
     @y.setter
     def y(self, Vec2 value) -> None:
+        """Set the Y base of the matrix."""
         self.yx = value.x
         self.yy = value.y
 
     @origin.setter
     def origin(self, Vec2 value) -> None:
+        """Set the origin."""
         self.ox = value.x
         self.oy = value.y
 
     def __getitem__(self, py_int item) -> Vec2:
+        """Get a column of the transformation matrix.
+
+        0: Base vector X
+        1: Base vector Y
+        2: Origin vector
+        """
         cdef Vec2 vec = Vec2.__new__(Vec2)
 
         if item == 0:
@@ -184,6 +218,13 @@ cdef class Transform2D:
         return vec
 
     def __setitem__(self, py_int key, Vec2 value) -> None:
+        """Set a column of the transformation matrix.
+
+        0: Base vector X
+        1: Base vector Y
+        2: Origin vector
+        """
+
         if key == 0:
             self.xx = value.x
             self.xy = value.y
@@ -197,6 +238,7 @@ cdef class Transform2D:
             raise IndexError(key)
 
     def __len__(self) -> py_int:
+        """The amount of columns. Is always 3 for `Transform2D`s."""
         return 3
 
     cdef inline py_float tdotx(self, py_float x, py_float y) noexcept:
@@ -212,6 +254,7 @@ cdef class Transform2D:
         return self.tdoty(x, y) + self.oy
 
     def __mul__(self, Vec2 other) -> Vec2:
+        """Transform a copy of the vector."""
         cdef Vec2 vec = Vec2.__new__(Vec2)
         vec.x = self.mulx(other.x, other.y)
         vec.y = self.muly(other.x, other.y)
@@ -219,6 +262,7 @@ cdef class Transform2D:
 
     #<OVERLOAD>
     cdef Vec2 __call__(self, Vec2 other):
+        """Transform a copy of the vector."""
         cdef Vec2 vec = Vec2.__new__(Vec2)
         vec.x = self.mulx(other.x, other.y)
         vec.y = self.muly(other.x, other.y)
@@ -226,6 +270,7 @@ cdef class Transform2D:
 
     #<OVERLOAD>
     cdef Transform2D __call__(self, Transform2D other):
+        """Transform a copy of the passed in `Transform2D`."""
         cdef Transform2D t = Transform2D.__new__(Transform2D)
         t.xx = self.tdotx(other.xx, other.xy)
         t.xy = self.tdoty(other.xx, other.xy)
@@ -238,6 +283,7 @@ cdef class Transform2D:
     #<OVERLOAD_DISPATCHER>:__call__
 
     def __matmul__(self, Transform2D other) -> Transform2D:
+        """Transform a copy of the `Transform2D` on the right."""
         cdef Transform2D t = Transform2D.__new__(Transform2D)
         t.xx = self.tdotx(other.xx, other.xy)
         t.xy = self.tdoty(other.xx, other.xy)
@@ -249,6 +295,7 @@ cdef class Transform2D:
 
     def __imatmul__(self, Transform2D other) -> Transform2D:
         #<RETURN_SELF>
+        """Transform this `Transform2D` inplace with the other `Transform2D`."""
         cdef py_float xx = other.tdotx(self.xx, self.xy)
         cdef py_float xy = other.tdoty(self.xx, self.xy)
         cdef py_float yx = other.tdotx(self.yx, self.yy)
@@ -265,9 +312,11 @@ cdef class Transform2D:
 
     @property
     def determinant(self) -> py_float:
+        """Compute the determinant of the matrix."""
         return self._determinant()
 
     def __invert__(self) -> Transform2D:
+        """Get the invert transform."""
         cdef py_float i_det = 1.0 / self._determinant()
         cdef Transform2D t = Transform2D.__new__(Transform2D)
         t.xx = self.yy * +i_det
@@ -314,10 +363,15 @@ cdef class Transform2D:
 
     @property
     def rotation(self) -> py_float:
+        """Get the rotation angle this transform represents."""
         return self.get_rotation()
 
     @rotation.setter
     def rotation(self, py_float value) -> None:
+        """Set the rotation angle this transform represents.
+
+        See Also: `Transform2D.rotating()`
+        """
         self.set_rotation(value)
 
     # @property
@@ -327,6 +381,7 @@ cdef class Transform2D:
     #     return proxy
     @property
     def scale(self) -> Vec2:
+        """Get the scaling transformation this transform represents."""
         cdef Vec2 vec = Vec2.__new__(Vec2)
         vec.x = self.get_scale_x()
         vec.y = self.get_scale_y()
@@ -334,33 +389,42 @@ cdef class Transform2D:
 
     @scale.setter
     def scale(self, Vec2 value) -> None:
+        """Set the scaling transformation this transform represents.
+
+        See Also: `Transform2D.scaling()`
+        """
         self.set_scale_x(value.x)
         self.set_scale_y(value.y)
 
 
     def translate_ip(self, Vec2 translation, /) -> Transform2D:
         #<RETURN_SELF>
+        """Apply translation to this transform inplace."""
         self.ox = translation.x
         self.oy = translation.y
         return self
 
     def translated(self, Vec2 translation, /) -> Transform2D:
+        """Apply translation to a copy of this transform."""
         cdef Transform2D t = self.copy()
         t.translate_ip(translation)
         return t
 
     def rotate_ip(self, py_float rotation, /) -> Transform2D:
         #<RETURN_SELF>
-        self.__imatmul__(Transform2D.rotation(rotation))
+        """Apply rotation to this transform inplace."""
+        self.__imatmul__(Transform2D.rotating(rotation))
         return self
 
     def rotated(self, py_float rotation, /) -> Transform2D:
+        """Apply rotation to a copy of this transform."""
         cdef Transform2D t = self.copy()
         t.rotate_ip(rotation)
         return t
 
     def scale_ip(self, Vec2 scale, /) -> Transform2D:
         #<RETURN_SELF>
+        """Apply scaling to this transform inplace."""
         self.xx *= scale.x
         self.xy *= scale.y
         self.yx *= scale.x
@@ -370,6 +434,7 @@ cdef class Transform2D:
         return self
 
     def scaled(self, Vec2 scale, /) -> Transform2D:
+        """Apply scaling to a copy of this transform."""
         cdef Transform2D t = self.copy()
         t.scale_ip(scale)
         return t

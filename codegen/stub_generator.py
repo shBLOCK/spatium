@@ -111,7 +111,7 @@ class StubClass:
             return src
 
         stub = [
-            "# noinspection SpellCheckingInspection",
+            "# noinspection SpellCheckingInspection,GrazieInspection",
             f"class {self.name}:"
         ]
         if self.docstring:
@@ -278,6 +278,7 @@ def gen_stub(source: str) -> str:
         classes.append(current_class)
 
     out_lines = [
+        "# noinspection PyUnresolvedReferences",
         "from typing import overload, Self, Any, Union",
         ""
     ]
