@@ -31,7 +31,7 @@ class Subject(enum.Enum):
 
 
 BASELINE = Subject.PurePython
-RUNS_TO_GET_MIN_TIME = 10
+RUNS_TO_GET_MIN_TIME = 30
 STMT_BATCH_SIZE = 10000
 
 class TestCase:

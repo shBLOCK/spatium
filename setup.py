@@ -1,5 +1,8 @@
 from setuptools import setup, Extension, find_packages
+from Cython.Compiler import Options
 
+Options.docstrings = True
+# Options.annotate = True
 
 setup(
     ext_modules=[

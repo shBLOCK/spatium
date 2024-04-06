@@ -31,12 +31,12 @@ cdef class Transform3D:
         self.ox = self.oy = self.oz = 0.0
 
     #<OVERLOAD>
-    cdef void __init__(self) noexcept:
+    cdef inline void __init__(self) noexcept:
         """Create an identity transform."""
         self.identity()
 
     #<OVERLOAD>
-    cdef void __init__(self, py_float xx, py_float xy, py_float xz, py_float yx, py_float yy, py_float yz, py_float zx, py_float zy, py_float zz, py_float ox, py_float oy, py_float oz) noexcept:
+    cdef inline void __init__(self, py_float xx, py_float xy, py_float xz, py_float yx, py_float yy, py_float yz, py_float zx, py_float zy, py_float zz, py_float ox, py_float oy, py_float oz) noexcept:
         """Create a transform from all the matrix elements."""
         self.xx = xx
         self.xy = xy
@@ -52,7 +52,7 @@ cdef class Transform3D:
         self.oz = oz
 
     #<OVERLOAD>
-    cdef void __init__(self, Vec3 x, Vec3 y, Vec3 z, Vec3 origin) noexcept:
+    cdef inline void __init__(self, Vec3 x, Vec3 y, Vec3 z, Vec3 origin) noexcept:
         """Create a transform using three base vectors and the origin vector."""
         self.xx, self.xy, self.xz = x.x, x.y, x.z
         self.yx, self.yy, self.yz = y.x, y.y, y.z
@@ -60,7 +60,7 @@ cdef class Transform3D:
         self.ox, self.oy, self.oz = origin.x, origin.y, origin.z
 
     #<OVERLOAD>
-    cdef void __init__(self, Transform3D transform) noexcept:
+    cdef inline void __init__(self, Transform3D transform) noexcept:
         """Create a copy."""
         self.xx = transform.xx
         self.xy = transform.xy
@@ -373,7 +373,7 @@ cdef class Transform3D:
         return vec
 
     #<OVERLOAD>
-    cdef Vec3 __call__(self, Vec3 other):
+    cdef inline Vec3 __call__(self, Vec3 other):
         """Transform a copy of the vector."""
         cdef Vec3 vec = Vec3.__new__(Vec3)
         vec.x = self.mulx(other.x, other.y, other.z)
@@ -382,7 +382,7 @@ cdef class Transform3D:
         return vec
 
     #<OVERLOAD>
-    cdef Transform3D __call__(self, Transform3D other):
+    cdef inline Transform3D __call__(self, Transform3D other):
         """Transform a copy of the passed in `Transform3D`."""
         cdef Transform3D t = Transform3D.__new__(Transform3D)
         t.xx = self.tdotx(other.xx, other.xy, other.xz)

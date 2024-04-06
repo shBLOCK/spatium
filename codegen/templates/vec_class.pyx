@@ -37,13 +37,13 @@ cdef class _VecClassName_:
 
 
     #<OVERLOAD>
-    cdef void __init__(self) noexcept:
+    cdef inline void __init__(self) noexcept:
         """Create a zero vector."""
         #<GEN>: gen_single_value_constructor(_Dims_, _vType_(0))
         pass #<IGNORE>
 
     #<OVERLOAD>
-    cdef void __init__(self, _vTypeC_ value) noexcept:
+    cdef inline void __init__(self, _vTypeC_ value) noexcept:
         """Create a vector with the same value for all elements."""
         #<GEN>: gen_single_value_constructor(_Dims_, "value")
         pass #<IGNORE>
@@ -120,7 +120,7 @@ cdef class _VecClassName_:
     #<GEN>: gen_common_binary_and_inplace_op("*", "mul", "multiplication")
     #<IF>: _Dims_ == 2
     #<OVERLOAD>
-    cdef Vec2 __mul__(self, Transform2D t):
+    cdef inline Vec2 __mul__(self, Transform2D t):
         """Transform a copy of this vector using the `Transform2D`."""
         cdef Vec2 vec = Vec2.__new__(Vec2)
         cdef py_float x = self.x - t.ox
@@ -131,7 +131,7 @@ cdef class _VecClassName_:
     #<ENDIF>
     #<IF>: _Dims_ == 3
     #<OVERLOAD>
-    cdef Vec3 __mul__(self, Transform3D t):
+    cdef inline Vec3 __mul__(self, Transform3D t):
         """Transform a copy of this vector using the `Transform3D`."""
         cdef Vec3 vec = Vec3.__new__(Vec3)
         cdef py_float x = self.x - t.ox

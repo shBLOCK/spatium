@@ -4,6 +4,7 @@ import vector_codegen
 
 if __name__ == '__main__':
     codegen.step_generate("_gdmath.pyx", write_file=True, _globals=globals())
+    # exit()
     codegen.step_gen_stub("_gdmath.pyx", "_gdmath.pyi")
 
     import os

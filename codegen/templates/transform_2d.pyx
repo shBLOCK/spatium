@@ -29,12 +29,12 @@ cdef class Transform2D:
         self.ox = self.oy = 0.0
 
     #<OVERLOAD>
-    cdef void __init__(self) noexcept:
+    cdef inline void __init__(self) noexcept:
         """Create an identity transform."""
         self.identity()
 
     #<OVERLOAD>
-    cdef void __init__(self, py_float xx, py_float xy, py_float yx, py_float yy, py_float ox, py_float oy) noexcept:
+    cdef inline void __init__(self, py_float xx, py_float xy, py_float yx, py_float yy, py_float ox, py_float oy) noexcept:
         """Create a transform from all the matrix elements."""
         self.xx = xx
         self.xy = xy
@@ -44,14 +44,14 @@ cdef class Transform2D:
         self.oy = oy
 
     #<OVERLOAD>
-    cdef void __init__(self, Vec2 x, Vec2 y, Vec2 origin) noexcept:
+    cdef inline void __init__(self, Vec2 x, Vec2 y, Vec2 origin) noexcept:
         """Create a transform using two base vectors and the origin vector."""
         self.xx, self.xy = x.x, x.y
         self.yx, self.yy = y.x, y.y
         self.ox, self.oy = origin.x, origin.y
 
     #<OVERLOAD>
-    cdef void __init__(self, Transform2D transform) noexcept:
+    cdef inline void __init__(self, Transform2D transform) noexcept:
         """Create a copy."""
         self.xx = transform.xx
         self.xy = transform.xy
@@ -261,7 +261,7 @@ cdef class Transform2D:
         return vec
 
     #<OVERLOAD>
-    cdef Vec2 __call__(self, Vec2 other):
+    cdef inline Vec2 __call__(self, Vec2 other):
         """Transform a copy of the vector."""
         cdef Vec2 vec = Vec2.__new__(Vec2)
         vec.x = self.mulx(other.x, other.y)
@@ -269,7 +269,7 @@ cdef class Transform2D:
         return vec
 
     #<OVERLOAD>
-    cdef Transform2D __call__(self, Transform2D other):
+    cdef inline Transform2D __call__(self, Transform2D other):
         """Transform a copy of the passed in `Transform2D`."""
         cdef Transform2D t = Transform2D.__new__(Transform2D)
         t.xx = self.tdotx(other.xx, other.xy)

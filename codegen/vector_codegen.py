@@ -41,7 +41,7 @@ def gen_type_conversion_constructor(dims: int, vtype: Type) -> str:
     from_type = float if vtype is int else int
     type_str = {int: "integer", float: "floating-point"}
     out = "#<OVERLOAD>\n"
-    out += f"cdef void __init__(self, {get_vec_class_name(dims, from_type)} vec) noexcept:\n"
+    out += f"cdef inline void __init__(self, {get_vec_class_name(dims, from_type)} vec) noexcept:\n"
     out += f'    """Convert a {type_str[from_type]} vector to a {type_str[vtype]} vector."""\n'
     for dim in DIMS[:dims]:
         out += f"    self.{dim} = <{get_c_type(vtype)}>vec.{dim}\n"
@@ -83,7 +83,7 @@ def gen_combination_constructors(dims: int, vtype: Type) -> str:
                 self_dim += 1
 
         func = "#<OVERLOAD>\n"
-        func += (f"cdef void __init__(self, "
+        func += (f"cdef inline void __init__(self, "
                  f"{', '.join(f'{t} {n}' for t, n in zip(param_types, param_names))}) noexcept:\n")
 
         docstring = f"Create a {dims}D vector from "
