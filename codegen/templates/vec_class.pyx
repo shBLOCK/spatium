@@ -121,7 +121,13 @@ cdef class _VecClassName_:
     #<IF>: _Dims_ == 2
     #<OVERLOAD>
     cdef inline Vec2 __mul__(self, Transform2D t):
-        """Transform a copy of this vector using the `Transform2D`."""
+        """Transform a copy of this vector using the *INVERSE* of the transform.
+        Use `transform * vector` or `transform(vector)` for non-inverse transformation.
+        
+        See Also:
+            `Transform2D.__mul__()`
+            `Transform2D.__call__()`
+        """
         cdef Vec2 vec = Vec2.__new__(Vec2)
         cdef py_float x = self.x - t.ox
         cdef py_float y = self.y - t.oy
@@ -132,7 +138,13 @@ cdef class _VecClassName_:
     #<IF>: _Dims_ == 3
     #<OVERLOAD>
     cdef inline Vec3 __mul__(self, Transform3D t):
-        """Transform a copy of this vector using the `Transform3D`."""
+        """Transform a copy of this vector using the *INVERSE* of the transform.
+        Use `transform * vector` or `transform(vector)` for non-inverse transformation.
+        
+        See Also:
+            `Transform3D.__mul__()`
+            `Transform3D.__call__()`
+        """
         cdef Vec3 vec = Vec3.__new__(Vec3)
         cdef py_float x = self.x - t.ox
         cdef py_float y = self.y - t.oy

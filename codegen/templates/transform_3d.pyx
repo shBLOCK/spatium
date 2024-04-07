@@ -365,7 +365,10 @@ cdef class Transform3D:
         return self.tdotz(x, y, z) + self.oz
 
     def __mul__(self, Vec3 other) -> Vec3:
-        """Transform a copy of the vector."""
+        """Transform a copy of the vector.
+
+        See Also: `Vec3.__mul__()`
+        """
         cdef Vec3 vec = Vec3.__new__(Vec3)
         vec.x = self.mulx(other.x, other.y, other.z)
         vec.y = self.muly(other.x, other.y, other.z)
@@ -374,7 +377,10 @@ cdef class Transform3D:
 
     #<OVERLOAD>
     cdef inline Vec3 __call__(self, Vec3 other):
-        """Transform a copy of the vector."""
+        """Transform a copy of the vector.
+        
+        See Also: `Vec3.__mul__()`
+        """
         cdef Vec3 vec = Vec3.__new__(Vec3)
         vec.x = self.mulx(other.x, other.y, other.z)
         vec.y = self.muly(other.x, other.y, other.z)
@@ -450,7 +456,10 @@ cdef class Transform3D:
         return self._determinant()
 
     def __invert__(self) -> Transform3D:
-        """Get the invert transform."""
+        """Get the invert transform.
+
+        See Also: `Vec3.__mul__()`
+        """
         cdef py_float cox = self.yy * self.zz - self.yz * self.zy
         cdef py_float coy = self.xz * self.zy - self.xy * self.zz
         cdef py_float coz = self.xy * self.yz - self.yy * self.xz

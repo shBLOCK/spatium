@@ -254,7 +254,10 @@ cdef class Transform2D:
         return self.tdoty(x, y) + self.oy
 
     def __mul__(self, Vec2 other) -> Vec2:
-        """Transform a copy of the vector."""
+        """Transform a copy of the vector.
+
+        See Also: `Vec2.__mul__()`
+        """
         cdef Vec2 vec = Vec2.__new__(Vec2)
         vec.x = self.mulx(other.x, other.y)
         vec.y = self.muly(other.x, other.y)
@@ -262,7 +265,10 @@ cdef class Transform2D:
 
     #<OVERLOAD>
     cdef inline Vec2 __call__(self, Vec2 other):
-        """Transform a copy of the vector."""
+        """Transform a copy of the vector.
+        
+        See Also: `Vec2.__mul__()`
+        """
         cdef Vec2 vec = Vec2.__new__(Vec2)
         vec.x = self.mulx(other.x, other.y)
         vec.y = self.muly(other.x, other.y)
@@ -316,7 +322,10 @@ cdef class Transform2D:
         return self._determinant()
 
     def __invert__(self) -> Transform2D:
-        """Get the invert transform."""
+        """Get the invert transform.
+
+        See Also: `Vec2.__mul__()`
+        """
         cdef py_float i_det = 1.0 / self._determinant()
         cdef Transform2D t = Transform2D.__new__(Transform2D)
         t.xx = self.yy * +i_det
