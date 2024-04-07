@@ -6,16 +6,6 @@ from numerize.numerize import numerize
 
 # Get rid of pygame import message
 import pygame
-
-import platform
-if platform.system() == "Windows":
-    import psutil
-    import os
-    psutil.Process(os.getpid()).nice(psutil.REALTIME_PRIORITY_CLASS)
-    print("Setting process priority to realtime class!")
-else:
-    print("Warning: Not on windows, not setting process priority!", file=sys.stderr)
-
 print()
 
 class Subject(enum.Enum):
@@ -31,7 +21,7 @@ class Subject(enum.Enum):
 
 
 BASELINE = Subject.PurePython
-RUNS_TO_GET_MIN_TIME = 30
+RUNS_TO_GET_MIN_TIME = 10
 STMT_BATCH_SIZE = 10000
 
 class TestCase:
@@ -78,65 +68,6 @@ def benchmark(name: str, number: int, *cases: TestCase):
         print(f"{case.subject.name}: {numerize(case.number, 0)} in {case.time:.3f}s - {case.per_sec_text}/s")
 
     print()
-
-
-def gen_plot():
-    import matplotlib.pyplot as plt
-    fig, ax = plt.subplots(
-        figsize=(12, 4),
-        layout="constrained"
-    )
-    ax.set_title(f"Benchmark - {BASELINE.label} Implementation as Baseline\nOperations Per Second")
-    ax.margins(x=0.02, y=0.2)
-
-    ax.axhline(
-        y=1,
-        color=BASELINE.color,
-        linestyle="--",
-        label="Baseline"
-    )
-
-    x_ticks = []
-    pos = 0
-    for bm_name, cases in benchmarks.items():
-        x_ticks.append((pos + (len(cases) - 1) / 2, bm_name))
-
-        baseline = [c for c in cases if c.subject == BASELINE]
-        assert len(baseline) == 1, "Baseline data not found or duplicate"
-        baseline = baseline[0]
-
-        for case in cases:
-            rect = ax.bar(
-                x = pos,
-                height = case.per_sec / baseline.per_sec,
-                width = 1,
-                label = case.subject.label,
-                color = case.subject.color
-            )
-            ax.bar_label(
-                rect,
-                padding=3,
-                labels=[case.per_sec_text],
-                fontsize=10,
-                rotation=90
-            )
-            pos += 1
-
-        pos += 1.5
-
-    ax.set_xticks(*zip(*x_ticks), rotation=15)
-
-    ax.yaxis.set_major_formatter(lambda x, pos: f"{x}x")
-
-    handles, labels = plt.gca().get_legend_handles_labels()
-    temp = {k: v for k, v in zip(labels, handles)}
-    ax.legend(
-        temp.values(), temp.keys(),
-        loc="upper left"
-    )
-
-    plt.savefig("chart.png")
-    plt.show()
 
 
 def main():
@@ -256,6 +187,7 @@ def main():
         "Swizzle Get",
         3_000_000,
         TestCase(Subject.PurePython, iab123_py, "a.zxy"),
+        TestCase(Subject.Pygame, iab123_pg, "a.zxy"),
         TestCase(Subject.GdMath, iab123_gd, "a.zxy")
     )
 
@@ -263,11 +195,103 @@ def main():
         "Swizzle Set",
         3_000_000,
         TestCase(Subject.PurePython, iab123_py, "a.zxy = b"),
+        TestCase(Subject.Pygame, iab123_pg, "a.zxy = b"),
         TestCase(Subject.GdMath, iab123_gd, "a.zxy = b")
     )
 
     gen_plot()
 
 
+def gen_plot():
+    import matplotlib.pyplot as plt
+    fig, ax = plt.subplots(
+        figsize=(12, 4),
+        layout="constrained"
+    )
+    ax.set_title(f"Benchmark - {BASELINE.label} Implementation as Baseline\nOperations Per Second")
+    ax.margins(x=0.02, y=0.2)
+
+    ax.axhline(
+        y=1,
+        color=BASELINE.color,
+        linestyle="--",
+        label="Baseline"
+    )
+
+    x_ticks = []
+    pos = 0
+    for bm_name, cases in benchmarks.items():
+        x_ticks.append((pos + (len(cases) - 1) / 2, bm_name))
+
+        baseline = [c for c in cases if c.subject == BASELINE]
+        assert len(baseline) == 1, "Baseline data not found or duplicate"
+        baseline = baseline[0]
+
+        for case in cases:
+            rect = ax.bar(
+                x = pos,
+                height = case.per_sec / baseline.per_sec,
+                width = 1,
+                label = case.subject.label,
+                color = case.subject.color
+            )
+            ax.bar_label(
+                rect,
+                padding=3,
+                labels=[case.per_sec_text],
+                fontsize=10,
+                rotation=90
+            )
+            pos += 1
+
+        pos += 1.5
+
+    ax.set_xticks(*zip(*x_ticks), rotation=15)
+
+    ax.yaxis.set_major_formatter(lambda x, pos: f"{x}x")
+
+    handles, labels = plt.gca().get_legend_handles_labels()
+    temp = {k: v for k, v in zip(labels, handles)}
+    ax.legend(
+        temp.values(), temp.keys(),
+        loc="upper left"
+    )
+
+    plt.savefig("chart.png")
+    plt.show()
+
+
+def prepare():
+    import platform
+    if platform.system() != "Windows":
+        print("Warning: Not on windows, not doing benchmark prep!", file=sys.stderr)
+        return
+
+    import psutil
+    proc = psutil.Process()
+    print("Prep: Setting process priority to realtime class.")
+    proc.nice(psutil.REALTIME_PRIORITY_CLASS)
+    print("Prep: Setting CPU affinity to [1].")
+    proc.cpu_affinity([1])
+    import subprocess
+    ps = "powershell -Command "
+    cfg_proc = "powercfg -setacvalueindex scheme_current sub_processor "
+    print("Prep: set powercfg")
+    subprocess.run(ps + cfg_proc + "procthrottlemax 100", capture_output=True)
+    subprocess.run(ps + cfg_proc + "procthrottlemin 100", capture_output=True)
+    subprocess.run(ps + cfg_proc + "idledisable 1", capture_output=True)
+    subprocess.run(ps + "powercfg -setactive scheme_current", capture_output=True)
+
+def cleanup():
+    import subprocess
+    print("Cleanup: reset powercfg")
+    subprocess.run("powershell -Command powercfg -setacvalueindex scheme_current sub_processor idledisable 0", capture_output=True)
+    subprocess.run("powershell -Command powercfg -setactive scheme_current", capture_output=True)
+
+
 if __name__ == '__main__':
-    main()
+    try:
+        prepare()
+        main()
+    finally:
+        cleanup()
