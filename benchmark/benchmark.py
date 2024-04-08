@@ -21,7 +21,7 @@ class Subject(enum.Enum):
 
 
 BASELINE = Subject.PurePython
-RUNS_TO_GET_MIN_TIME = 10
+RUNS_TO_GET_MIN_TIME = 30
 STMT_BATCH_SIZE = 10000
 
 class TestCase:
@@ -279,7 +279,7 @@ def prepare():
     print("Prep: set powercfg")
     subprocess.run(ps + cfg_proc + "procthrottlemax 100", capture_output=True)
     subprocess.run(ps + cfg_proc + "procthrottlemin 100", capture_output=True)
-    subprocess.run(ps + cfg_proc + "idledisable 1", capture_output=True)
+    # subprocess.run(ps + cfg_proc + "idledisable 1", capture_output=True)
     subprocess.run(ps + "powercfg -setactive scheme_current", capture_output=True)
 
 def cleanup():
