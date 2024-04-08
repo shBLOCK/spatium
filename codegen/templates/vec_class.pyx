@@ -65,7 +65,8 @@ cdef class _VecClassName_:
         """
         if not isinstance(other, _VecClassName_):
             return False
-        return #<GEN>: gen_for_each_dim("self.{dim} == other.{dim}", _Dims_, join=" and ")
+        cdef _VecClassName_ vec = <_VecClassName_> other
+        return #<GEN>: gen_for_each_dim("self.{dim} == vec.{dim}", _Dims_, join=" and ")
 
     def __ne__(self, object other) -> bool:
         """Perform exact comparison.
@@ -74,7 +75,8 @@ cdef class _VecClassName_:
         """
         if not isinstance(other, _VecClassName_):
             return True
-        return #<GEN>: gen_for_each_dim("self.{dim} != other.{dim}", _Dims_, join=" or ")
+        cdef _VecClassName_ vec = <_VecClassName_> other
+        return #<GEN>: gen_for_each_dim("self.{dim} != vec.{dim}", _Dims_, join=" or ")
 
     def is_close(self, _VecClassName_ other, /, py_float rel_tol = DEFAULT_RELATIVE_TOLERANCE, py_float abs_tol = DEFAULT_ABSOLUTE_TOLERANCE) -> bool:
         """Determine if the two vectors are close enough.

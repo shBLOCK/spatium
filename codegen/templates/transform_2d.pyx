@@ -114,9 +114,10 @@ cdef class Transform2D:
         """
         if not isinstance(other, Transform2D):
             return False
-        return self.xx == (<Transform2D> other).xx and self.xy == (<Transform2D> other).xy and\
-               self.yx == (<Transform2D> other).yx and self.yy == (<Transform2D> other).yy and\
-               self.ox == (<Transform2D> other).ox and self.oy == (<Transform2D> other).oy
+        cdef Transform2D trans = <Transform2D> other
+        return self.xx == trans.xx and self.xy == trans.xy and\
+               self.yx == trans.yx and self.yy == trans.yy and\
+               self.ox == trans.ox and self.oy == trans.oy
 
     def __ne__(self, object other) -> bool:
         """Perform exact comparison.
@@ -125,9 +126,10 @@ cdef class Transform2D:
         """
         if not isinstance(other, Transform2D):
             return True
-        return self.xx != (<Transform2D> other).xx or self.xy != (<Transform2D> other).xy or \
-               self.yx != (<Transform2D> other).yx or self.yy != (<Transform2D> other).yy or \
-               self.ox != (<Transform2D> other).ox or self.oy != (<Transform2D> other).oy
+        cdef Transform2D trans = <Transform2D> other
+        return self.xx != trans.xx or self.xy != trans.xy or \
+               self.yx != trans.yx or self.yy != trans.yy or \
+               self.ox != trans.ox or self.oy != trans.oy
 
     def is_close(self, Transform2D other, /, py_float rel_tol = DEFAULT_RELATIVE_TOLERANCE, py_float abs_tol = DEFAULT_ABSOLUTE_TOLERANCE) -> bool:
         """Determine if the two transforms are close enough.

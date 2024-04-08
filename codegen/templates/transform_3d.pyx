@@ -168,10 +168,11 @@ cdef class Transform3D:
         """
         if not isinstance(other, Transform3D):
             return False
-        return self.xx == (<Transform3D> other).xx and self.xy == (<Transform3D> other).xy and self.xz == (<Transform3D> other).xz and\
-               self.yx == (<Transform3D> other).yx and self.yy == (<Transform3D> other).yy and self.yz == (<Transform3D> other).yz and\
-               self.zx == (<Transform3D> other).zx and self.zy == (<Transform3D> other).zy and self.zz == (<Transform3D> other).zz and\
-               self.ox == (<Transform3D> other).ox and self.oy == (<Transform3D> other).oy and self.oz == (<Transform3D> other).oz
+        cdef Transform3D trans = <Transform3D> other
+        return self.xx == trans.xx and self.xy == trans.xy and self.xz == trans.xz and\
+               self.yx == trans.yx and self.yy == trans.yy and self.yz == trans.yz and\
+               self.zx == trans.zx and self.zy == trans.zy and self.zz == trans.zz and\
+               self.ox == trans.ox and self.oy == trans.oy and self.oz == trans.oz
 
     def __ne__(self, object other) -> bool:
         """Perform exact comparison.
@@ -180,10 +181,11 @@ cdef class Transform3D:
         """
         if not isinstance(other, Transform3D):
             return True
-        return self.xx != (<Transform3D> other).xx or self.xy != (<Transform3D> other).xy or self.xz != (<Transform3D> other).xz or\
-               self.yx != (<Transform3D> other).yx or self.yy != (<Transform3D> other).yy or self.yz != (<Transform3D> other).yz or\
-               self.zx != (<Transform3D> other).zx or self.zy != (<Transform3D> other).zy or self.zz != (<Transform3D> other).zz or\
-               self.ox != (<Transform3D> other).ox or self.oy != (<Transform3D> other).oy or self.oz != (<Transform3D> other).oz
+        cdef Transform3D trans = <Transform3D> other
+        return self.xx != trans.xx or self.xy != trans.xy or self.xz != trans.xz or\
+               self.yx != trans.yx or self.yy != trans.yy or self.yz != trans.yz or\
+               self.zx != trans.zx or self.zy != trans.zy or self.zz != trans.zz or\
+               self.ox != trans.ox or self.oy != trans.oy or self.oz != trans.oz
 
     def is_close(self, Transform3D other, /, py_float rel_tol = DEFAULT_RELATIVE_TOLERANCE, py_float abs_tol = DEFAULT_ABSOLUTE_TOLERANCE) -> bool:
         """Determine if the two transforms are close enough.
