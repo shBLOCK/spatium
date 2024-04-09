@@ -27,8 +27,8 @@ jobs:
         run: python gen_all.py
         working-directory: codegen
 
-      - name: Copy outputs to src
-        run: copy "codegen\output\*" "src\gdmath"
+#      - name: Copy outputs to src
+#        run: copy "codegen\output\*" "src\gdmath"
 
 #      - name: Validate
 #        run: pip install .

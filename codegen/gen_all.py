@@ -7,8 +7,9 @@ if __name__ == '__main__':
     # exit()
     codegen.step_gen_stub("_gdmath.pyx", "_gdmath.pyi")
 
-    import os
-    if os.getenv("CI") != "true":
+    import sys
+    if "--install" in sys.argv:
+        print("#"*15 + " Install " + "#"*15)
         codegen.step_move_to_dest("../src/gdmath/", "_gdmath", ".pyx")
         codegen.step_move_to_dest("../src/gdmath/", "_gdmath", ".pyi")
 
@@ -18,5 +19,3 @@ if __name__ == '__main__':
         subprocess.call(f"{sys.executable} -m pip uninstall gdmath -y", stdout=sys.stdout)
         print("#"*15 + "pip install -v -v -v .." + "#"*15)
         subprocess.call(f"{sys.executable} -m pip install -v -v -v ..", stdout=sys.stdout, stderr=sys.stdout)
-    else:
-        print("Running in CI platform!")
