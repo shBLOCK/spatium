@@ -258,6 +258,9 @@ def gen_plot():
     )
 
     plt.savefig("chart.png")
+    import shutil
+    shutil.copyfile("chart.png", "history_charts/")
+
     plt.show()
 
 
