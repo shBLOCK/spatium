@@ -19,11 +19,11 @@ jobs:
       - name: Install Dependencies
         run: pip install -r requirements.txt
 
-      - name: Codegen
+      - name: Run Codegen
         run: python gen_all.py
         working-directory: codegen
 
-      - name: Upload Artifacts
+      - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
           name: codegen_results

@@ -120,10 +120,8 @@ jobs:
       - name: Download Codegen Result
         uses: actions/download-artifact@v4
         with:
-          name: "codegen_results"
-
-      - name: Unzip
-        run: 7z x codegen_results.zip -osrc/spatium
+          name: codegen_results
+          path: src/spatium
 
       - name: Setup Python
         uses: actions/setup-python@v5
