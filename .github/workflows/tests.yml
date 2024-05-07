@@ -32,15 +32,15 @@ jobs:
                   workflow_id: "codegen.yml"
               })
               let latest = runs.data.workflow_runs.sort(run => -run.run_number)[0]
-              console.log("latest: " + latest)
+              console.log("latest: " + JSON.stringify(latest))
               
               let artifacts = await github.rest.actions.listWorkflowRunArtifacts({
                   owner: context.repo.owner,
                   repo: context.repo.repo,
                   run_id: latest.id
-              }).data
-              console.log("artis: "+artifacts)
-              let artifact = artifacts.artifacts.filter(a => a.name == "codegen_results")[0]
+              })
+              console.log("artis: "+JSON.stringify(artifacts))
+              let artifact = artifacts.data.artifacts.filter(a => a.name == "codegen_results")[0]
               
               if (artifact.expired) {
                   core.setFailed("Codegen artifact expired, please manually run the codegen workflow to generate a new result.")
