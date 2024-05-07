@@ -22,8 +22,8 @@ jobs:
 
       - name: Fetch Latest Codegen Result
         uses: actions/github-script@v7
-        debug: true
         with:
+          debug: true
           # noinspection TypeScriptUnresolvedReference
           script: |
               let latest = null
