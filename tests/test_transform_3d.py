@@ -1,7 +1,7 @@
 from math import sin, cos, isclose
 from random import random
 
-from gdmath import Transform3D, Vec3
+from spatium import Transform3D, Vec3
 
 
 def test_normal_constructor_and_get_components():

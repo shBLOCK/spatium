@@ -41,7 +41,7 @@ jobs:
             fs.writeFileSync(`${process.env.GITHUB_WORKSPACE}/codegen_results.zip`, Buffer.from(download.data));
 
       - name: Unzip
-        run: 7z x codegen_results.zip -osrc/gdmath
+        run: 7z x codegen_results.zip -osrc/spatium
 
       - name: Setup Python
         uses: actions/setup-python@v4

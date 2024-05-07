@@ -12,7 +12,7 @@ class Subject(enum.Enum):
     PurePython = "Pure Python", "tab:blue", "from pure_python_impl import Vec3"
     Pygame = "Pygame", "tab:green", "from pygame import Vector3"
     Numpy = "Numpy", "tab:orange", "import numpy as np; array = np.array"
-    GdMath = "GdMath", "tab:purple", "from gdmath import Vec3"
+    Spatium = "Spatium", "tab:purple", "from spatium import Vec3"
 
     def __init__(self, label: str, color: str, setup: str):
         self.label = label
@@ -77,13 +77,13 @@ def main():
         TestCase(Subject.PurePython, "", "Vec3(1.0, 2.0, 3.0)"),
         TestCase(Subject.Pygame, "", "Vector3(1.0, 2.0, 3.0)"),
         TestCase(Subject.Numpy, "tp = (1.0, 2.0, 3.0)", "array(tp)"),
-        TestCase(Subject.GdMath, "", "Vec3(1.0, 2.0, 3.0)")
+        TestCase(Subject.Spatium, "", "Vec3(1.0, 2.0, 3.0)")
     )
 
     iab123_py = "a = Vec3(1, 2, 3); b = Vec3(3, 2, 1)"
     iab123_pg = "a = Vector3(1, 2, 3); b = Vector3(3, 2, 1)"
     iab123_np = "a = array((1.0, 2.0, 3.0)); b = array((3.0, 2.0, 1.0))"
-    iab123_gd = "a = Vec3(1, 2, 3); b = a.zyx"
+    iab123_sp = "a = Vec3(1, 2, 3); b = a.zyx"
 
     benchmark(
         "Copy",
@@ -91,7 +91,7 @@ def main():
         TestCase(Subject.PurePython, iab123_py, "+a"),
         TestCase(Subject.Pygame, iab123_pg, "a.copy()"),
         TestCase(Subject.Numpy, iab123_np, "a.copy()"),
-        TestCase(Subject.GdMath, iab123_gd, "+a")
+        TestCase(Subject.Spatium, iab123_sp, "+a")
     )
 
     benchmark(
@@ -100,7 +100,7 @@ def main():
         TestCase(Subject.PurePython, iab123_py, "a + b"),
         TestCase(Subject.Pygame, iab123_pg, "a + b"),
         TestCase(Subject.Numpy, iab123_np, "a + b"),
-        TestCase(Subject.GdMath, iab123_gd, "a + b")
+        TestCase(Subject.Spatium, iab123_sp, "a + b")
     )
 
     benchmark(
@@ -109,7 +109,7 @@ def main():
         TestCase(Subject.PurePython, iab123_py, "a += b"),
         TestCase(Subject.Pygame, iab123_pg, "a += b"),
         TestCase(Subject.Numpy, iab123_np, "a += b"),
-        TestCase(Subject.GdMath, iab123_gd, "a += b")
+        TestCase(Subject.Spatium, iab123_sp, "a += b")
     )
 
     benchmark(
@@ -118,7 +118,7 @@ def main():
         TestCase(Subject.PurePython, iab123_py, "a @ b"),
         TestCase(Subject.Pygame, iab123_pg, "a.dot(b)"),
         TestCase(Subject.Numpy, iab123_np, "a.dot(b)"),
-        TestCase(Subject.GdMath, iab123_gd, "a @ b")
+        TestCase(Subject.Spatium, iab123_sp, "a @ b")
     )
 
     benchmark(
@@ -127,7 +127,7 @@ def main():
         TestCase(Subject.PurePython, iab123_py, "a ^ b"),
         TestCase(Subject.Pygame, iab123_pg, "a.cross(b)"),
         TestCase(Subject.Numpy, iab123_np + "; cross = np.cross", "cross(a, b)", number=30_000),
-        TestCase(Subject.GdMath, iab123_gd, "a ^ b")
+        TestCase(Subject.Spatium, iab123_sp, "a ^ b")
     )
 
     benchmark(
@@ -136,7 +136,7 @@ def main():
         TestCase(Subject.PurePython, iab123_py, "a == b"),
         TestCase(Subject.Pygame, iab123_pg, "a == b"),
         TestCase(Subject.Numpy, iab123_np, "a == b"),
-        TestCase(Subject.GdMath, iab123_gd, "a == b")
+        TestCase(Subject.Spatium, iab123_sp, "a == b")
     )
 
     benchmark(
@@ -145,7 +145,7 @@ def main():
         TestCase(Subject.PurePython, iab123_py, "tuple(a)"),
         TestCase(Subject.Pygame, iab123_pg, "tuple(a)"),
         TestCase(Subject.Numpy, iab123_np, "tuple(a)"),
-        TestCase(Subject.GdMath, iab123_gd, "tuple(a)")
+        TestCase(Subject.Spatium, iab123_sp, "tuple(a)")
     )
 
     benchmark(
@@ -153,7 +153,7 @@ def main():
         3_000_000,
         TestCase(Subject.PurePython, iab123_py, "a.length"),
         TestCase(Subject.Pygame, iab123_pg, "a.length()"),
-        TestCase(Subject.GdMath, iab123_gd, "a.length")
+        TestCase(Subject.Spatium, iab123_sp, "a.length")
     )
 
     benchmark(
@@ -162,7 +162,7 @@ def main():
         TestCase(Subject.PurePython, iab123_py, "a.normalized"),
         TestCase(Subject.Pygame, iab123_pg, "a.normalize()"),
         TestCase(Subject.Numpy, iab123_np + "; norm = np.linalg.norm", "norm(a)"),
-        TestCase(Subject.GdMath, iab123_gd, "a.normalized")
+        TestCase(Subject.Spatium, iab123_sp, "a.normalized")
     )
 
     benchmark(
@@ -171,7 +171,7 @@ def main():
         TestCase(Subject.PurePython, iab123_py, "a[1]"),
         TestCase(Subject.Pygame, iab123_pg, "a[1]"),
         TestCase(Subject.Numpy, iab123_np, "a[1]"),
-        TestCase(Subject.GdMath, iab123_gd, "a[1]")
+        TestCase(Subject.Spatium, iab123_sp, "a[1]")
     )
 
     benchmark(
@@ -180,7 +180,7 @@ def main():
         TestCase(Subject.PurePython, iab123_py, "a[1] = 4"),
         TestCase(Subject.Pygame, iab123_pg, "a[1] = 4"),
         TestCase(Subject.Numpy, iab123_np, "a[1] = 4"),
-        TestCase(Subject.GdMath, iab123_gd, "a[1] = 4")
+        TestCase(Subject.Spatium, iab123_sp, "a[1] = 4")
     )
 
     benchmark(
@@ -188,7 +188,7 @@ def main():
         3_000_000,
         TestCase(Subject.PurePython, iab123_py, "a.zxy"),
         TestCase(Subject.Pygame, iab123_pg, "a.zxy"),
-        TestCase(Subject.GdMath, iab123_gd, "a.zxy")
+        TestCase(Subject.Spatium, iab123_sp, "a.zxy")
     )
 
     benchmark(
@@ -196,7 +196,7 @@ def main():
         3_000_000,
         TestCase(Subject.PurePython, iab123_py, "a.zxy = b"),
         TestCase(Subject.Pygame, iab123_pg, "a.zxy = b"),
-        TestCase(Subject.GdMath, iab123_gd, "a.zxy = b")
+        TestCase(Subject.Spatium, iab123_sp, "a.zxy = b")
     )
 
     gen_plot()

@@ -1,7 +1,7 @@
 import pytest
 import math
 
-from gdmath import *
+from spatium import *
 
 
 def test_empty_constructor():

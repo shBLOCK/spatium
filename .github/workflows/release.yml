@@ -35,12 +35,12 @@ jobs:
       - name: Cythonize
         shell: pwsh
         run: |
-          foreach ($file in (Get-ChildItem src/gdmath/*.pyx)) {
+          foreach ($file in (Get-ChildItem src/spatium/*.pyx)) {
             cython "$($file.FullName)"
           }
 
       - name: Copy outputs to src
-        run: copy "codegen\output\*" "src\gdmath"
+        run: copy "codegen\output\*" "src\spatium"
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v3
@@ -63,7 +63,7 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: codegen_results
-          path: src/gdmath
+          path: src/spatium
 
       - name: Setup Python
         uses: actions/setup-python@v4
@@ -105,7 +105,7 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: codegen_results
-          path: src/gdmath
+          path: src/spatium
 
       - name: CIBuildWheel
         uses: pypa/cibuildwheel@v2.17.0

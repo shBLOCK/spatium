@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/GdMath.iml" filepath="$PROJECT_DIR$/.idea/GdMath.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/spatium.iml" filepath="$PROJECT_DIR$/.idea/spatium.iml" />
     </modules>
   </component>
 </project>

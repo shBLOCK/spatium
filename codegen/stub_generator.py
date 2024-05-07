@@ -290,6 +290,6 @@ def gen_stub(source: str) -> str:
 
 
 if __name__ == '__main__':
-    result = gen_stub(open("output/_gdmath.pyx", encoding="utf8").read())
-    with open("output/_gdmath.pyi", "w") as f:
+    result = gen_stub(open("output/_spatium.pyx", encoding="utf8").read())
+    with open("output/_spatium.pyi", "w") as f:
         f.write(result)

@@ -7,14 +7,14 @@ Options.docstrings = True
 setup(
     ext_modules=[
         Extension(
-            "gdmath._gdmath",
-            ["src/gdmath/_gdmath.pyx"],
+            "spatium._spatium",
+            ["src/spatium/_spatium.pyx"],
             # extra_compile_args=["-std=c++20", "/std:c++20"],
         ),
     ],
     packages=find_packages(
         where="src",
-        exclude=["tests", "gdmath/*.c", "gdmath/*.cpp"]
+        exclude=["tests", "spatium/*.c", "spatium/*.cpp"]
     ),
     package_dir={'': 'src'},
 )
