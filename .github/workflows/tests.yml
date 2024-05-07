@@ -29,10 +29,11 @@ jobs:
               let runs = await github.rest.actions.listWorkflowRuns({
                   owner: context.repo.owner,
                   repo: context.repo.repo,
-                  workflow_id: "codegen.yml"
+                  workflow_id: "codegen.yml",
+                  status: "success"
               })
+              console.log("runs: " + JSON.stringify(runs))
               let latest = runs.data.workflow_runs.sort(run => -run.run_number)[0]
-              console.log("latest: " + JSON.stringify(latest))
               
               let artifacts = await github.rest.actions.listWorkflowRunArtifacts({
                   owner: context.repo.owner,
