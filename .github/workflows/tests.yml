@@ -4,6 +4,7 @@ on:
   workflow_run:
     workflows: [Codegen]
     types: [completed]
+  workflow_dispatch:
 
 jobs:
   tests:
@@ -19,32 +20,70 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Download Codegen Output
-        uses: actions/github-script@v6
+      - name: Fetch Latest Codegen Result
+        uses: actions/github-script@v7
         with:
+          # noinspection TypeScriptUnresolvedReference
           script: |
-            let allArtifacts = await github.rest.actions.listWorkflowRunArtifacts({
-               owner: context.repo.owner,
-               repo: context.repo.repo,
-               run_id: context.payload.workflow_run.id,
-            });
-            let matchArtifact = allArtifacts.data.artifacts.filter((artifact) => {
-              return artifact.name == "codegen_results"
-            })[0];
-            let download = await github.rest.actions.downloadArtifact({
-               owner: context.repo.owner,
-               repo: context.repo.repo,
-               artifact_id: matchArtifact.id,
-               archive_format: 'zip',
-            });
-            let fs = require('fs');
-            fs.writeFileSync(`${process.env.GITHUB_WORKSPACE}/codegen_results.zip`, Buffer.from(download.data));
+              let runs = await github.rest.actions.listWorkflowRuns({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  workflow_id: "codegen.yml"
+              })
+              let latest = runs.data.workflow_runs.sort(run => -run.run_number)[0]
+              let artifact = await github.rest.actions.listWorkflowRunArtifacts({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  run_id: latest.id,
+              }).data.artifacts.filter((artifact) => {
+                  return artifact.name == "codegen_results"
+              })[0];
+              if (artifact.expired) {
+                  core.setFailed("Codegen artifact expired, please manually run the codegen workflow to generate a new result.");
+              } else {
+                  let download = await github.rest.actions.downloadArtifact({
+                      owner: context.repo.owner,
+                      repo: context.repo.repo,
+                      artifact_id: matchArtifact.id,
+                      archive_format: 'zip',
+                  });
+                  let fs = require('fs');
+                  fs.writeFileSync(`${process.env.GITHUB_WORKSPACE}/codegen_results.zip`, Buffer.from(download.data));
+              }
+
+#      - name: Download Codegen Output
+#        uses: actions/download-artifact@v4
+#        with:
+#          name: codegen_results
+#          github-token: ${{ github.token }}
+#          run-id: ${{ github }}
+#
+#      - name: Download Codegen Output
+#        uses: actions/github-script@v7
+#        with:
+#          script: |
+#            let allArtifacts = await github.rest.actions.listWorkflowRunArtifacts({
+#               owner: context.repo.owner,
+#               repo: context.repo.repo,
+#               run_id: context.payload.workflow_run.id,
+#            });
+#            let matchArtifact = allArtifacts.data.artifacts.filter((artifact) => {
+#              return artifact.name == "codegen_results"
+#            })[0];
+#            let download = await github.rest.actions.downloadArtifact({
+#               owner: context.repo.owner,
+#               repo: context.repo.repo,
+#               artifact_id: matchArtifact.id,
+#               archive_format: 'zip',
+#            });
+#            let fs = require('fs');
+#            fs.writeFileSync(`${process.env.GITHUB_WORKSPACE}/codegen_results.zip`, Buffer.from(download.data));
 
       - name: Unzip
         run: 7z x codegen_results.zip -osrc/spatium
 
       - name: Setup Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python }}
 
