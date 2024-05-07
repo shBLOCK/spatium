@@ -22,16 +22,18 @@ jobs:
 
       - name: Fetch Latest Codegen Result
         uses: actions/github-script@v7
+        debug: true
         with:
           # noinspection TypeScriptUnresolvedReference
           script: |
               let latest = null
               for await (const runs of github.paginate.iterator(
-                  github.rest.actions.listWorkflowRuns({
+                  github.rest.actions.listWorkflowRuns,
+                  {
                       owner: context.repo.owner,
                       repo: context.repo.repo,
                       workflow_id: "codegen.yml"
-                  })
+                  }
               )) {
                   for (const run of runs.data.workflow_runs) {
                       latest = (latest != null && run.run_number > latest.run_number)
