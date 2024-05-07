@@ -4,6 +4,16 @@ on:
   push:
     branches:
       - master
+    paths:
+      - "codegen/**"
+      - "src/**"
+      - "tests/**"
+      - ".github/workflows/codegen.yml"
+      - ".github/workflows/tests.yml"
+      - "*"
+      - "!**/*.md"
+      - "!**/*.txt"
+      - "!**/.gitignore"
   pull_request:
     branches:
       - master
@@ -33,4 +43,4 @@ jobs:
         with:
           name: codegen_results
           path: codegen/output/
-          retention-days: 10
+          retention-days: 5
