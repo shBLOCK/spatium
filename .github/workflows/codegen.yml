@@ -2,7 +2,14 @@ name: Codegen
 
 on:
   workflow_call:
+    inputs:
+      ref:
+        type: string
+        required: false
   workflow_dispatch:
+
+env:
+  PIP_DISABLE_PIP_VERSION_CHECK: 1
 
 jobs:
   codegen:
@@ -10,6 +17,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
 
       - name: Setup Python
         uses: actions/setup-python@v5
