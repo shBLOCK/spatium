@@ -27,6 +27,7 @@ jobs:
         id: determine_tag
         uses: actions/github-script@v7
         with:
+          debug: true
           # noinspection TypeScriptUnresolvedReference
           script: |
               let tag = context.inputs.tag
@@ -37,14 +38,17 @@ jobs:
                       ref: "tags/v"
                   }).data
                   
+                  console.log(JSON.stringify(refs))
+                  
                   let tags = await Promise.all(
-                      refs.map(async ref => await github.rest.git.getTag({
+                      refs.map(
+                          async ref => await github.rest.git.getTag({
                               owner: context.repo.owner,
                               repo: context.repo.repo,
                               tag_sha: ref.object.sha
                           }).data
-                      ))
-                      .sort(tag => Date.parse(tag.tagger.date))
+                      )
+                  ).sort(tag => Date.parse(tag.tagger.date))
                   tag = tags[tags.length - 1]
               }
               console.log(`Using tag: ${tag.tag}`)
