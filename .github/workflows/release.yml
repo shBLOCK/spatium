@@ -36,12 +36,12 @@ jobs:
                       owner: context.repo.owner,
                       repo: context.repo.repo,
                       ref: "tags/v"
-                  }).data
+                  })
                   
                   console.log(JSON.stringify(refs))
                   
                   let tags = await Promise.all(
-                      refs.map(
+                      refs.data.map(
                           async ref => await github.rest.git.getTag({
                               owner: context.repo.owner,
                               repo: context.repo.repo,
