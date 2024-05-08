@@ -6,8 +6,8 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        type: environment
-        description: The tag of the release, leave empty for the latest tag.
+        type: string
+        description: The tag of the release, leave empty for latest.
         required: false
 
 env:
