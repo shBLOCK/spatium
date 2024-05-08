@@ -19,6 +19,9 @@ on:
       - master
   workflow_dispatch:
 
+env:
+  PIP_DISABLE_PIP_VERSION_CHECK: 1
+
 jobs:
   codegen:
     uses: ./.github/workflows/codegen.yml
