@@ -33,6 +33,11 @@ jobs:
               let tag = context.payload.inputs.tag
               if (!tag) {
                   core.info("Getting latest tag...")
+                  console.log(JSON.stringify(await github.rest.repos.listTags({
+                      owner: context.repo.owner,
+                      repo: context.repo.repo,
+                      per_page: 1
+                  })))
                   tag = await github.rest.repos.listTags({
                       owner: context.repo.owner,
                       repo: context.repo.repo,
