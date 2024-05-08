@@ -1,4 +1,4 @@
-# 🚀Spatium: a fast spatial math library
+# 🚀Spatium: a fast python spatial math library
 
 [![PyPI Version](https://img.shields.io/pypi/v/spatium?label=PyPI)](https://pypi.org/project/spatium)
 [![Python Version](https://img.shields.io/pypi/pyversions/spatium?label=Python)](https://pypi.org/project/spatium)
