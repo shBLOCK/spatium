@@ -30,6 +30,7 @@ jobs:
           debug: true
           # noinspection TypeScriptUnresolvedReference
           script: |
+              console.log(JSON.stringify(context))
               let tag = context.inputs.tag
               if (!tag) {
                   let refs = await github.rest.git.listMatchingRefs({
