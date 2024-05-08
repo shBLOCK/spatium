@@ -3,61 +3,100 @@ name: Release
 on:
   push:
     tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      tag:
+        type: environment
+        description: The tag of the release, leave empty for the latest tag.
+        required: false
 
 env:
   GH_TOKEN: ${{ github.token }}
+  PIP_DISABLE_PIP_VERSION_CHECK: 1
 
 permissions: write-all
 
 jobs:
-  prepare:
+  prep:
     runs-on: windows-latest
+    outputs:
+      tag: ${{ steps.determine_tag.outputs.tag }}
+      message: ${{ steps.determine_tag.outputs.message }}
     steps:
-      - name: Validate push
-        if: github.event.commits[1] != null
-        run: echo "::error title=Invalid push::The release push much include only the tagged commit!"
+      - name: Determine Release Tag
+        id: determine_tag
+        uses: actions/github-script@v7
+        with:
+          # noinspection TypeScriptUnresolvedReference
+          script: |
+              let tag = context.inputs.tag
+              if (!tag) {
+                  let refs = await github.rest.git.listMatchingRefs({
+                      owner: context.repo.owner,
+                      repo: context.repo.repo,
+                      ref: "tags/v"
+                  }).data
+                  
+                  let tags = await Promise.all(
+                      refs.map(async ref => await github.rest.git.getTag({
+                              owner: context.repo.owner,
+                              repo: context.repo.repo,
+                              tag_sha: ref.object.sha
+                          }).data
+                      ))
+                      .sort(tag => Date.parse(tag.tagger.date))
+                  tag = tags[tags.length - 1]
+              }
+              console.log(`Using tag: ${tag.tag}`)
+              core.setOutput("tag", tag.tag)
+              core.setOutput("message", tag.message)
 
       - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Setup Python
-        uses: actions/setup-python@v5
         with:
-          python-version: 3.12
+          ref: ${{ steps.determine_tag.outputs.tag }}
 
-      - name: Install Dependencies
-        run: pip install -r requirements.txt
-
-      - name: Codegen
-        run: python gen_all.py
-        working-directory: codegen
-
-      - name: Cythonize
-        shell: pwsh
-        run: |
-          foreach ($file in (Get-ChildItem src/spatium/*.pyx)) {
-            cython "$($file.FullName)"
-          }
-
-      - name: Copy outputs to src
-        run: copy "codegen\output\*" "src\spatium"
-
-      - name: Upload Artifacts
-        uses: actions/upload-artifact@v4
+      - name: Validate Tag
+        uses: actions/github-script@v7
         with:
-          name: codegen_results
-          path: codegen/output/
-          retention-days: 1
+          # noinspection TypeScriptUnresolvedReference
+          script: |
+              const version_pattern = new RegExp("version\s*=\s*\"(?<version>[^\"]+])\"")
+              const tag = ""
+              if (tag[0] != "v") {
+                  core.setFailed("Invalid version tag: must be \"v*.*.*\".")
+                  return
+              }
+              const fs = require("node:fs")
+              const readline = require("node:readline")
+              for await (const line of readline.createInterface({
+                  input: fs.createReadStream("pyproject.toml"),
+                  crlfDelay: Infinity
+              })) {
+                  const match = line.match(version_pattern)
+                  if (match) {
+                      if (tag.substring(1) != match.groups.version)
+                          core.setFailed("Tag doesn't match the version defined in pyproject.toml")
+                      return
+                  }
+              }
 
-      - name: Create Release
-        run: gh release create "${{ github.ref_name }}" --verify-tag --title "${{ github.ref_name }}" --notes "${{ github.event.head_commit.message }}" --draft
+  codegen:
+    name: Codegen
+    needs: prep
+    uses: ./.github/workflows/codegen.yml
+    with:
+      ref: ${{ needs.prep.outputs.tag }}
 
   source_dists:
+    name: Source Dists
     runs-on: windows-latest
-    needs: prepare
+    needs: [codegen, prep]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.prep.outputs.tag }}
 
       - name: Download Codegen Output
         uses: actions/download-artifact@v4
@@ -76,22 +115,16 @@ jobs:
       - name: Build
         run: python setup.py sdist --formats=gztar,zip
 
-      - name: Upload
-        shell: pwsh
-        run: |
-          foreach ($file in (Get-ChildItem dist/*)) {
-            gh release upload "${{ github.ref_name }}" "$($file.FullName)"
-          }
-
-      - name: Upload to Artifacts
+      - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: dists
+          name: src_dists
           path: dist/
 
   binary_dists:
+    name: Binary Dists
     runs-on: ${{ matrix.platform }}
-    needs: prepare
+    needs: [codegen, prep]
     strategy:
       fail-fast: true
       matrix:
@@ -100,6 +133,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.prep.outputs.tag }}
 
       - name: Download Codegen Output
         uses: actions/download-artifact@v4
@@ -124,39 +159,65 @@ jobs:
       - name: Upload to Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: dists
+          name: bin_dists
           path: dist/
 
-  final_publish:
+  github_release:
+    name: "GitHub Release"
     runs-on: ubuntu-latest
-    needs: [source_dists, binary_dists]
+    needs: [source_dists, prep]
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+#      - name: Checkout
+#        uses: actions/checkout@v4
+      - name: Download Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: src_dists
+          path: dist
+
+      - name: Remove Prior Release
+        run: gh release delete "${{ needs.prep.outputs.tag }}"
+        continue-on-error: true
+
+      - name: Create Release
+        run: gh release create "${{ needs.prep.outputs.tag }}" --verify-tag --title "${{ needs.prep.outputs.tag }}" --notes "${{ needs.prep.outputs.message }}" --draft
+
+      - name: Upload
+        shell: pwsh
+        run: |
+          foreach ($file in (Get-ChildItem dist/*)) {
+            gh release upload "${{ needs.prep.outputs.tag }}" "$($file.FullName)"
+          }
 
       - name: Publish
-        run: gh release edit ${{ github.ref_name }} --draft=false
+        run: gh release edit ${{ needs.prep.outputs.tag }} --draft=false
 
-  pypi_publish:
+  pypi_upload:
+    name: "PyPI Upload"
     runs-on: ubuntu-latest
-    needs: final_publish
+    needs: [source_dists, binary_dists]
     permissions:
-      id-token: write
+      id-token: write # pypi trusted publishing
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+#      - name: Checkout
+#        uses: actions/checkout@v4
 
       - run: mkdir dist
 
       - name: Download Artifacts
         uses: actions/download-artifact@v4
         with:
-          name: dists
+          pattern: "*dists"
           path: dist
+          merge-multiple: true
 
-      - name: Delete redundant sdists
+      - name: Delete Redundant Source Dist
         shell: pwsh
+        # only keep .tar.gz
         run: rm dist/*.zip
 
+       # use trusted publishing
       - name: Upload
-        uses: pypa/gh-action-pypi-publish@v1.8.10
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: https://test.pypi.org/legacy/
