@@ -1,8 +1,12 @@
 name: Release
 
 on:
+  # FIXME: DEBUG ONLY, REMOVE AFTERWARD
+#  push:
+#    tags: ["v*"]
   push:
-    tags: ["v*"]
+    paths:
+      - ".github/workflows/release.yml"
   workflow_dispatch:
     inputs:
       tag:
