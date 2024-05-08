@@ -28,16 +28,24 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
-    "Topic :: Software Development :: Libraries :: Python Modules",
-    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Programming Language :: Python :: Implementation :: PyPy",
+    "Typing :: Typed",
+    "Operating System :: OS Independent",
+    "License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)",
     "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "Topic :: Software Development :: Libraries :: Python Modules",
     "Topic :: Scientific/Engineering :: Mathematics",
-    "Topic :: Software Development :: Libraries",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Software Development :: Code Generators",
+    "Topic :: Games/Entertainment",
+    "Topic :: Multimedia :: Graphics",
 ]
 
 [project.urls]
-"Documentation" = "https://github.com/shBLOCK/spatium/wiki"
 "Source" = "https://github.com/shBLOCK/spatium"
+"Documentation" = "https://github.com/shBLOCK/spatium/wiki"
 "Issue Tracker" = "https://github.com/shBLOCK/spatium/issues"
 
 [tool.cython]

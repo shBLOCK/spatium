@@ -4,11 +4,12 @@
 [![Python Version](https://img.shields.io/pypi/pyversions/spatium?label=Python)](https://pypi.org/project/spatium)
 <br>
 ![Language](https://img.shields.io/badge/Language-Cython-FEDF5B)
-![Python Implementation](https://img.shields.io/badge/Impl-Cython_|_PyPy-blue)
+![Python Implementation](https://img.shields.io/pypi/implementation/spatium?label=Implementation)
 <br>
 [![Codegen](https://github.com/shBLOCK/spatium/actions/workflows/codegen.yml/badge.svg)](https://github.com/shBLOCK/spatium/actions/workflows/codegen.yml)
 [![Tests](https://github.com/shBLOCK/spatium/actions/workflows/tests.yml/badge.svg)](https://github.com/shBLOCK/spatium/actions/workflows/tests.yml)
 [![Release](https://github.com/shBLOCK/spatium/actions/workflows/release.yml/badge.svg)](https://github.com/shBLOCK/spatium/actions/workflows/release.yml)
+[![Benchmark](https://github.com/shBLOCK/spatium/actions/workflows/benchmark.yml/badge.svg)](https://github.com/shBLOCK/spatium/actions/workflows/benchmark.yml)
 
 ## ⚙️Main features
 - Fast Pure Cython Implementation
