@@ -32,26 +32,15 @@ jobs:
           script: |
               let tag = context.payload.inputs.tag
               if (!tag) {
-                  let refs = await github.rest.git.listMatchingRefs({
+                  core.info("Getting latest tag...")
+                  tag = await github.rest.repos.listTags({
                       owner: context.repo.owner,
                       repo: context.repo.repo,
-                      ref: "tags/v"
-                  })
-                  
-                  console.log(JSON.stringify(refs))
-                  
-                  let tags = await Promise.all(
-                      refs.data.map(
-                          async ref => await github.rest.git.getTag({
-                              owner: context.repo.owner,
-                              repo: context.repo.repo,
-                              tag_sha: ref.object.sha
-                          }).data
-                      )
-                  ).sort(tag => Date.parse(tag.tagger.date))
-                  tag = tags[tags.length - 1]
+                      per_page: 1
+                  }).data[0].name
               }
-              console.log(`Using tag: ${tag.tag}`)
+              core.info(`Using tag: ${tag}`)
+              core.notice(`Using tag: ${tag}`)
               core.setOutput("tag", tag.tag)
               core.setOutput("message", tag.message)
 
@@ -79,6 +68,7 @@ jobs:
               })) {
                   const match = line.match(version_pattern)
                   if (match) {
+                      core.info(`Version from pyproject.toml: ${match.groups.version}`)
                       if (tag.substring(1) != match.groups.version)
                           core.setFailed("Tag doesn't match the version defined in pyproject.toml")
                       return
