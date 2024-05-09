@@ -58,7 +58,7 @@ jobs:
                           }
                       } else {
                           if (tag == undefined || Date.parse(commit_data.committer.date) > Date.parse(commit.committer.date)) {
-                              tag = tag_date
+                              tag = tag_data
                               commit = commit_data
                           }
                       }
