@@ -179,13 +179,6 @@ jobs:
         env:
           CIBW_BUILD: "${{ matrix.python }}-*"
 
-      #      - name: Upload
-#        shell: pwsh
-#        run: |
-#          foreach ($file in (Get-ChildItem dist/*)) {
-#            gh release upload "${{ github.ref_name }}" "$($file.FullName)"
-#          }
-
       - name: Upload to Artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -197,8 +190,9 @@ jobs:
     runs-on: ubuntu-latest
     needs: [source_dists, prep]
     steps:
-#      - name: Checkout
-#        uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Download Artifacts
         uses: actions/download-artifact@v4
         with:
@@ -229,9 +223,6 @@ jobs:
     permissions:
       id-token: write # pypi trusted publishing
     steps:
-#      - name: Checkout
-#        uses: actions/checkout@v4
-
       - run: mkdir dist
 
       - name: Download Artifacts
