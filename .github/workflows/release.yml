@@ -69,8 +69,6 @@ jobs:
                   return
               }
               
-              core.info(`Using tag: ${tag.name}`)
-              core.info(`Message: ${commit.message}`)
               core.notice(`Using tag: ${tag.name}`)
               core.notice(`Message: ${commit.message}`)
               core.setOutput("tag", tag.name)
@@ -88,8 +86,8 @@ jobs:
         with:
           # noinspection TypeScriptUnresolvedReference
           script: |
-              const tag_validator = new RegExp("v\d(?:\.\d)+")
-              const version_pattern = new RegExp("version\s*=\s*\"(?<version>[^\"]+])\"")
+              const tag_validator = /v\d(?:\.\d)+/
+              const version_pattern = /version\s*=\s*"(?<version>[^"]+])"/
               const tag = process.env.TAG_NAME
               core.info(`Tag: ${tag}`)
               if (!tag.match(tag_validator)) {
