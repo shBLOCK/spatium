@@ -118,7 +118,7 @@ jobs:
 
   source_dists:
     name: Source Dists
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     needs: [codegen, prep]
     steps:
       - name: Checkout
@@ -198,7 +198,7 @@ jobs:
           name: dists_src
           path: dist
 
-      - name: Remove Prior Release
+      - name: Remove Old Release
         uses: actions/github-script@v7
         env:
           TAG_NAME: ${{ needs.prep.outputs.tag }}
@@ -206,11 +206,11 @@ jobs:
           # noinspection TypeScriptUnresolvedReference
           script: |
               const tag = process.env.TAG_NAME
-              const release = await github.rest.repos.getReleaseByTag({
+              const release = (await github.rest.repos.getReleaseByTag({
                   owner: context.repo.owner,
                   repo: context.repo.repo,
                   tag: tag
-              })
+              })).data
               if (release.id == undefined) { // Not found
                   core.info(`No release with tag ${tag}.`)
               } else {
@@ -219,7 +219,7 @@ jobs:
                       repo: context.repo.repo,
                       release_id: release.id
                   })
-                  core.notice(`Deleted prior github release: ${tag}`)
+                  core.notice(`Deleted old github release: ${tag}`)
               }
 
       - name: Create Release
