@@ -34,14 +34,34 @@ jobs:
           debug: true
           # noinspection TypeScriptUnresolvedReference
           script: |
-              let tag = context.payload.inputs.tag
-              if (!tag) {
-                  core.info("Getting latest tag...")
-                  tag = (await github.rest.repos.listTags({
+              let tag = undefined
+              let commit = undefined
+              for await (const tags of github.paginate.iterator(
+                  github.rest.repos.listTags,
+                  {
                       owner: context.repo.owner,
-                      repo: context.repo.repo,
-                      per_page: 1
-                  })).data[0].name
+                      repo: context.repo.repo
+                  }
+              )) {
+                  for (const tag_data of tags.data) {
+                      core.info(`Checking tag ${tag_data.name}`)
+                      const commit_data = (await github.rest.repos.getCommit({
+                          owner: context.repo.owner,
+                          repo: context.repo.repo,
+                          ref: tag_data.commit.sha
+                      })).data.commit
+                      if (context.payload.inputs.tag) {
+                          if (tag_data.name == context.payload.input.tag) {
+                              tag = tag_data
+                              commit = commit_data
+                          }
+                      } else {
+                          if (tag == undefined || Date.parse(commit_data.committer.date) > Date.parse(commit.committer.date)) {
+                              tag = tag_date
+                              commit = commit_data
+                          }
+                      }
+                  }
               }
               core.info(`Using tag: ${tag}`)
               core.notice(`Using tag: ${tag}`)
