@@ -34,7 +34,7 @@ jobs:
           debug: true
           # noinspection TypeScriptUnresolvedReference
           script: |
-              console.log(JSON.stringify(context.payload))
+              console.log(JSON.stringify(context))
               let tag = undefined
               let commit = undefined
               for await (const tags of github.paginate.iterator(
