@@ -34,7 +34,7 @@ jobs:
           debug: true
           # noinspection TypeScriptUnresolvedReference
           script: |
-              console.log(JSON.stringify(context))
+              const specified_tag = context.payload.inputs && context.payload.inputs.tag
               let tag = undefined
               let commit = undefined
               for await (const tags of github.paginate.iterator(
@@ -51,7 +51,7 @@ jobs:
                           repo: context.repo.repo,
                           ref: tag_data.commit.sha
                       })).data.commit
-                      if (context.payload.inputs.tag) {
+                      if (specified_tag) {
                           if (tag_data.name == context.payload.inputs.tag) {
                               tag = tag_data
                               commit = commit_data
@@ -64,6 +64,12 @@ jobs:
                       }
                   }
               }
+              
+              if (tag == undefined) {
+                  core.setFailed("Failed to determine a tag.")
+                  return
+              }
+              
               core.info(`Using tag: ${tag.name}`)
               core.info(`Message: ${commit.message}`)
               core.notice(`Using tag: ${tag.name}`)
