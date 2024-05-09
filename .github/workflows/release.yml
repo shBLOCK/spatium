@@ -1,12 +1,8 @@
 name: Release
 
 on:
-  # FIXME: DEBUG ONLY, REMOVE AFTERWARD
-#  push:
-#    tags: ["v*"]
   push:
-    paths:
-      - ".github/workflows/release.yml"
+    tags: ["v*"]
   workflow_dispatch:
     inputs:
       tag:
@@ -20,6 +16,7 @@ env:
 
 jobs:
   prep:
+    name: Prepare
     runs-on: windows-latest
     outputs:
       tag: ${{ steps.determine_tag.outputs.tag }}
@@ -148,6 +145,7 @@ jobs:
         with:
           name: dists_src
           path: dist/
+          retention-days: 1
 
   binary_dists:
     name: Binary Dists
@@ -182,12 +180,14 @@ jobs:
         with:
           name: dists_bin_${{ matrix.python }}_${{ matrix.platform }}
           path: dist/
+          retention-days: 1
 
   github_release:
     name: "GitHub Release"
     runs-on: ubuntu-latest
     needs: [source_dists, prep]
-    permissions: write-all
+    permissions:
+      contents: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -256,8 +256,8 @@ jobs:
         # only keep .tar.gz
         run: rm dist/*.zip
 
-       # use trusted publishing
+      # use trusted publishing
       - name: Upload
         uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          repository-url: https://test.pypi.org/legacy/
+#        with:
+#          repository-url: https://test.pypi.org/legacy/
