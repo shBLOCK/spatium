@@ -31,7 +31,6 @@ jobs:
         id: determine_tag
         uses: actions/github-script@v7
         with:
-          debug: true
           # noinspection TypeScriptUnresolvedReference
           script: |
               const specified_tag = context.payload.inputs && context.payload.inputs.tag
@@ -73,6 +72,7 @@ jobs:
               core.info(`Using tag: ${tag.name}`)
               core.info(`Message: ${commit.message}`)
               core.notice(`Using tag: ${tag.name}`)
+              core.notice(`Message: ${commit.message}`)
               core.setOutput("tag", tag.name)
               core.setOutput("message", commit.message)
 
@@ -84,8 +84,10 @@ jobs:
       - name: Validate Tag
         uses: actions/github-script@v7
         with:
+          debug: true
           # noinspection TypeScriptUnresolvedReference
           script: |
+              console.log(JSON.stringify(context))
               const version_pattern = new RegExp("version\s*=\s*\"(?<version>[^\"]+])\"")
               const tag = ""
               if (tag[0] != "v") {
