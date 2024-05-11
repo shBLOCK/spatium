@@ -7,6 +7,9 @@ on:
       - benchmark/results/*.json
       - benchmark/*chart*.py
       - .github/workflows/charts.yml
+  workflow_run:
+    workflows: [Benchmark]
+    types: [completed]
   workflow_dispatch:
 
 jobs:
