@@ -25,7 +25,10 @@ __all__ = (
     "load_result",
     "clear_env",
     "Path",
-    "numerize"
+    "numerize",
+    "log",
+    "temp_log",
+    "indent_log"
 )
 
 TIMER = time.perf_counter_ns
@@ -490,6 +493,7 @@ class BenchmarkResult:
 
 
 def run_benchmarks(*benchmarks: Benchmark, **kwargs) -> BenchmarkResult:
+    begin = time.perf_counter()
     try:
         if not benchmarks:
             benchmarks = tuple(Benchmark.instances)
@@ -502,6 +506,7 @@ def run_benchmarks(*benchmarks: Benchmark, **kwargs) -> BenchmarkResult:
         log("Terminated", color="red")
         exit(0)
 
+    log(f"All completed in {time.perf_counter() - begin:.1f}s")
 
     return result
 
@@ -528,15 +533,13 @@ def clear_env():
 
 def save_result(result: BenchmarkResult, file: Path):
     """Save the result and the current environment to a json file."""
-    log(f"Saving to {file}")
+    log(f"Saving to {file}...")
     with file.open("w", encoding="utf8") as f:
         json.dump(serialize(result), f, indent=4, ensure_ascii=False)
-    log("Done")
 
 def load_result(file: Path) -> BenchmarkResult:
     """Restore the result and the environment from a json file."""
-    log(f"Loading from {file}")
+    log(f"Loading from {file}...")
     with file.open("r", encoding="utf8") as f:
         result = deserialize(json.load(f))
-        log("Done")
         return result
