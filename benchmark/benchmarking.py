@@ -324,12 +324,13 @@ class TestCase:
 
     def auto_number(self) -> int:
         assert self.is_auto_number
-        for expo in itertools.count(3):
-            for n in (1, 2, 5):
-                self.number = n * 10**expo
-                runtime = self.run().runtime
+        for self.number in auto_number_series():
+            with temp_log():
+                log(numerize(self.number, decimals=1), False)
+                runtime = min(self.run().runtime for _ in range(5))
                 if runtime > AUTO_NUMBER_TARGET_TIME:
                     return runtime
+                self.number = int(self.number * 1.1)
 
     def run(self) -> "TestCaseResult":
         log(".", False)

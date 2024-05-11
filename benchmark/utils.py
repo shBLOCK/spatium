@@ -31,10 +31,17 @@ __all__ = (
     "log",
     "indent_log",
     "temp_log",
-    "iter_identity"
+    "iter_identity",
+    "auto_number_series"
 )
 
 SourceLines = Tuple[str, ...]
+
+def auto_number_series() -> Generator[int, None, None]:
+    for expo in itertools.count(2):
+        # E12 series
+        for value in (10, 12, 15, 18, 22, 27, 33, 39, 47, 56, 68, 82):
+            yield value * 10 ** expo
 
 def indent(src: SourceLines) -> SourceLines:
     return tuple(" "*4 + line for line in src)
