@@ -147,6 +147,10 @@ jobs:
           path: dist/
           retention-days: 1
 
+      - name: Fail-Fast
+        if: failure()
+        uses: andymckay/cancel-action@0.3
+
   binary_dists:
     name: Binary Dists
     runs-on: ${{ matrix.platform }}
@@ -182,6 +186,10 @@ jobs:
           path: dist/
           retention-days: 1
 
+      - name: Fail-Fast
+        if: failure()
+        uses: andymckay/cancel-action@0.3
+
   github_release:
     name: GitHub Release
     runs-on: ubuntu-latest
@@ -215,7 +223,7 @@ jobs:
                       tag: tag
                   })).data
               } catch (error) {
-                  if (error instanceof HttpError && error.status === 404) {
+                  if (error.status === 404) {
                       core.info(`No release with tag ${tag}.`)
                       return
                   }
@@ -241,6 +249,10 @@ jobs:
 
       - name: Publish
         run: gh release edit ${{ needs.prep.outputs.tag }} --draft=false
+
+      - name: Fail-Fast
+        if: failure()
+        uses: andymckay/cancel-action@0.3
 
   pypi_upload:
     name: PyPI Upload
@@ -268,3 +280,7 @@ jobs:
         uses: pypa/gh-action-pypi-publish@release/v1
 #        with:
 #          repository-url: https://test.pypi.org/legacy/
+
+      - name: Fail-Fast
+        if: failure()
+        uses: andymckay/cancel-action@0.3
