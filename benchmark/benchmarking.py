@@ -33,8 +33,8 @@ __all__ = (
 
 TIMER = time.perf_counter_ns
 BenchmarkFunc = Callable[[int, Callable[[], int]], int]
-# AUTO_NUMBER_TARGET_TIME = 0.5e9
-AUTO_NUMBER_TARGET_TIME = 0.005e9
+AUTO_NUMBER_TARGET_TIME = 0.5e9
+# AUTO_NUMBER_TARGET_TIME = 0.005e9
 
 class Subject:
     """

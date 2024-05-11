@@ -10,6 +10,7 @@
 [![Tests](https://github.com/shBLOCK/spatium/actions/workflows/tests.yml/badge.svg)](https://github.com/shBLOCK/spatium/actions/workflows/tests.yml)
 [![Release](https://github.com/shBLOCK/spatium/actions/workflows/release.yml/badge.svg)](https://github.com/shBLOCK/spatium/actions/workflows/release.yml)
 [![Benchmark](https://github.com/shBLOCK/spatium/actions/workflows/benchmark.yml/badge.svg)](https://github.com/shBLOCK/spatium/actions/workflows/benchmark.yml)
+[![Charts](https://github.com/shBLOCK/spatium/actions/workflows/charts.yml/badge.svg)](https://github.com/shBLOCK/spatium/actions/workflows/charts.yml)
 
 ## ⚙️Main features
 - Fast Pure Cython Implementation
@@ -32,7 +33,7 @@
 Please refer to the [wiki](https://github.com/shBLOCK/spatium/wiki) for more details
 
 ## 📈Benchmark
-[![Benchmark Results](https://github.com/shBLOCK/spatium/raw/master/benchmark/chart.png)](https://github.com/shBLOCK/spatium/tree/master/benchmark/chart.png)
+[![Benchmark Results](https://github.com/shBLOCK/spatium/raw/master/benchmark/charts/latest.svg)](https://github.com/shBLOCK/spatium/tree/master/benchmark/charts)
 
 ## 🔧Implementation details
 - **Codegen!**  

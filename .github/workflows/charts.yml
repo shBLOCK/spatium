@@ -1,0 +1,39 @@
+name: Charts
+
+on:
+  workflow_run:
+    workflows: [Benchmark]
+    types: [completed]
+  workflow_dispatch:
+
+jobs:
+  gen_charts:
+    name: Gen Benchmark Charts
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.12
+
+      - name: Install Dependencies
+        run: pip install -r benchmark/requirements.txt
+
+      - name: Gen Charts
+        run: python benchmark/gen_charts.py
+        working-directory: benchmark
+
+      - name: Commit Results
+        run: |
+          git add benchmark/charts
+          git commit -m "Upload benchmark charts"
+
+      - name: Push
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
