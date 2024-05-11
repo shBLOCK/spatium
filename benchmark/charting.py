@@ -42,12 +42,13 @@ def chart(result: BenchmarkResult, baseline: Subject, *, fig_height=5, subtitles
         figsize=(len(tuple(result.benchmarks)) * 0.9 + 1, fig_height)
     )
 
-    ax.set_facecolor("#161b22")
+    # Plot Background
+    ax.set_facecolor("#21262d")
 
     # Background
-    bg_edge = 3
+    bg_edge = 2
     bg = BackgroundFancyBboxPatch(
-        facecolor="#0d1117",
+        facecolor="#161b22",
         linewidth=bg_edge,
         edgecolor="#30363d",
         figure=fig
@@ -129,12 +130,12 @@ def chart(result: BenchmarkResult, baseline: Subject, *, fig_height=5, subtitles
         temp.values(), temp.keys(),
         loc="upper left",
         labelcolor=_TEXT,
-        facecolor="#2b2d30",
-        edgecolor="#2b2d30",
+        facecolor="#3d3f42",
+        edgecolor="#3d3f42",
         fancybox = True,
         framealpha = 0.5
     )
-    legend.legendPatch.set_boxstyle("round", rounding_size=1)
+    legend.legendPatch.set_boxstyle("round", rounding_size=0.5)
 
     fig.tight_layout(pad=1)
 
