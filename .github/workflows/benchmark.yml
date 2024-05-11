@@ -1,0 +1,51 @@
+name: Benchmark
+
+on:
+  workflow_dispatch:
+
+jobs:
+  codegen:
+    uses: ./.github/workflows/codegen.yml
+
+  benchmark:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download Codegen Result
+        uses: actions/download-artifact@v4
+        with:
+          name: codegen_results
+          path: src/spatium
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.12
+
+      - name: Install Dependencies
+        run: pip install -r requirements.txt
+
+      - name: Build
+        run: pip install -v -v -v .
+
+      - name: Install Benchmark Dependencies
+        run: pip install -r benchmark/requirements.txt
+
+      - name: Benchmark
+        run: python benchmarks.py
+        working-directory: benchmark
+
+      - name: Commit Results
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add benchmark/results/*
+
+      - name: Push
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
