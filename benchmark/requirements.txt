@@ -1,6 +1,7 @@
-pygame
+pygame-ce
 numpy
 matplotlib
-tqdm
 numerize
 psutil
+py-cpuinfo
+colorama
