@@ -11,11 +11,24 @@
         </value>
       </option>
     </inspection_tool>
+    <inspection_tool class="PyIncorrectDocstringInspection" enabled="true" level="INFORMATION" enabled_by_default="true" />
+    <inspection_tool class="PyPackageRequirementsInspection" enabled="true" level="INFORMATION" enabled_by_default="true" editorAttributes="INFORMATION_ATTRIBUTES">
+      <option name="ignoredPackages">
+        <value>
+          <list size="0" />
+        </value>
+      </option>
+    </inspection_tool>
     <inspection_tool class="PyPep8Inspection" enabled="true" level="WEAK WARNING" enabled_by_default="true">
       <option name="ignoredErrors">
         <list>
           <option value="E305" />
           <option value="E302" />
+          <option value="E702" />
+          <option value="E303" />
+          <option value="E306" />
+          <option value="E251" />
+          <option value="E231" />
         </list>
       </option>
     </inspection_tool>
