@@ -1,3 +1,4 @@
+import gzip
 import inspect
 import json
 import math
@@ -533,14 +534,14 @@ def clear_env():
     Subject.instances.clear()
 
 def save_result(result: BenchmarkResult, file: Path):
-    """Save the result and the current environment to a json file."""
+    """Save the result and the current environment to a gzipped json file."""
     log(f"Saving to {file}...")
-    with file.open("w", encoding="utf8") as f:
-        json.dump(serialize(result), f, indent=4, ensure_ascii=False)
+    with gzip.open(file, "wt", encoding="utf8") as f:
+        json.dump(serialize(result), f, ensure_ascii=False)
 
 def load_result(file: Path) -> BenchmarkResult:
-    """Restore the result and the environment from a json file."""
+    """Restore the result and the environment from a gzipped json file."""
     log(f"Loading from {file}...")
-    with file.open("r", encoding="utf8") as f:
+    with gzip.open(file, "rt", encoding="utf8") as f:
         result = deserialize(json.load(f))
         return result

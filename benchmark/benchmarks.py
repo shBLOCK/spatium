@@ -155,4 +155,4 @@ result = run_benchmarks(
     order_permutations=True,
     min_runs_per_case=100
 )
-save_result(result, Path("results", result.datetime.strftime("%Y%m%d_%H-%M-%S") + ".json"))
+save_result(result, Path("results", result.datetime.strftime("%Y%m%d_%H-%M-%S") + ".dat"))

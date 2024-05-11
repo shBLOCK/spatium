@@ -6,32 +6,29 @@ import charting
 from benchmarking import load_result, clear_env, Path, Subject, log, indent_log
 
 
-files = [f[:-5] for f in os.listdir("results") if f.endswith(".json")]
+files = [f[:-4] for f in os.listdir("results") if f.endswith(".dat")]
 # Latest to earliest
 files.sort(reverse=True, key=lambda f: datetime.datetime.strptime(f, "%Y%m%d_%H-%M-%S"))
 
 for file in files:
     log(f"{file}:")
     with indent_log():
-        try:
-            result = load_result(Path(f"results/{file}.json"))
-            log("Generating chart...")
-            chart = charting.chart(
-                result,
-                Subject.get_instance("pure_python"),
-                fig_height=5,
-                subtitles=(
-                    f"{result.datetime.strftime("%Y/%d/%m-%H:%M")} · "
-                    f"{result.metadata.py_impl} {result.metadata.py_ver} · "
-                    f"{result.metadata.system} · "
-                    f"{result.metadata.cpu}"
-                    + ("  (GitHub Actions)" if result.metadata.ci else "")
-                    ,
-                )
+        result = load_result(Path(f"results/{file}.dat"))
+        log("Generating chart...")
+        chart = charting.chart(
+            result,
+            Subject.get_instance("pure_python"),
+            fig_height=5,
+            subtitles=(
+                f"{result.datetime.strftime("%Y/%d/%m-%H:%M")} · "
+                f"{result.metadata.py_impl} {result.metadata.py_ver} · "
+                f"{result.metadata.system} · "
+                f"{result.metadata.cpu}"
+                + ("  (GitHub Actions)" if result.metadata.ci else "")
+                ,
             )
-            chart.savefig(f"charts/{file}.svg")
-        except Exception as e:
-            log(f"Failed to generate chart for {file}.json: {repr(e)}")
+        )
+        chart.savefig(f"charts/{file}.svg")
         clear_env()
 
 log()
