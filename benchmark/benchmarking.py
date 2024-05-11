@@ -410,7 +410,7 @@ class BenchmarkMetadata:
             import platform, cpuinfo, os
             self.system = platform.system()
             log(f"System: {self.system}")
-            self.ci = os.getenv("CI") == "true"
+            self.ci = CI
             log(f"CI: {self.ci}")
             try:
                 cpu = cpuinfo.get_cpu_info()

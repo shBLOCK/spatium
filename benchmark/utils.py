@@ -1,4 +1,5 @@
 import gc
+import os
 import inspect
 import itertools
 from contextlib import contextmanager
@@ -11,7 +12,10 @@ from typing import Tuple, TypeVar, Type, Optional, Iterable, Generator
 import colorama
 from numerize.numerize import numerize
 
+CI = os.getenv("CI") == "true"
+
 __all__ = (
+    "CI",
     "SourceLines",
     "indent",
     "dedent",
@@ -106,26 +110,28 @@ def indent_log(n=1):
     assert _log_indent >= 0
 
 _log_chrs_stack = []
+_log_temp_log = False
 @contextmanager
 def temp_log(disable=False):
     if disable:
         yield
         return
 
-    global _should_indent
+    global _should_indent, _log_temp_log
+    _log_temp_log = True
     old_should_indent = _should_indent
     _log_chrs_stack.append(0)
     yield
-    # print("\\b"+str(_log_chrs_stack[-1]))
-    # print(colorama.ansi.clear_line(1), end="")
-    # print(colorama.ansi.Cursor.UP())
-    # print("\r", end="", flush=True)
-    print("\r\033[K", end="", flush=True)
-    # print("\b" * _log_chrs_stack.pop(-1), end="")
+    if not CI:
+        print("\b" * _log_chrs_stack.pop(-1), end="")
     _should_indent = old_should_indent
+    _log_temp_log = False
 
 _should_indent = True
 def log(msg="", new_line=True, color: str = None):
+    if CI and _log_temp_log:
+        return
+
     global _should_indent
     msg = str(msg)
     if _should_indent:
