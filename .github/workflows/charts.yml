@@ -25,7 +25,7 @@ jobs:
         run: pip install -r benchmark/requirements.txt
 
       - name: Gen Charts
-        run: python benchmark/gen_charts.py
+        run: python gen_charts.py
         working-directory: benchmark
 
       - name: Commit Results
