@@ -117,7 +117,11 @@ def temp_log(disable=False):
     _log_chrs_stack.append(0)
     yield
     # print("\\b"+str(_log_chrs_stack[-1]))
-    print("\b" * _log_chrs_stack.pop(-1), end="")
+    # print(colorama.ansi.clear_line(1), end="")
+    # print(colorama.ansi.Cursor.UP())
+    # print("\r", end="", flush=True)
+    print("\r\033[K", end="", flush=True)
+    # print("\b" * _log_chrs_stack.pop(-1), end="")
     _should_indent = old_should_indent
 
 _should_indent = True
@@ -130,7 +134,7 @@ def log(msg="", new_line=True, color: str = None):
         msg = getattr(colorama.Fore, color.upper()) + msg + colorama.Back.RESET
     if new_line:
         msg += "\n"
-    print(msg, end="")
+    print(msg, end="", flush=True)
     if _log_chrs_stack:
         _log_chrs_stack[-1] += len(msg)
 
