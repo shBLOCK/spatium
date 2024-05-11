@@ -8,6 +8,7 @@ jobs:
     uses: ./.github/workflows/codegen.yml
 
   benchmark:
+    needs: codegen
     runs-on: ubuntu-latest
     permissions:
       contents: write
