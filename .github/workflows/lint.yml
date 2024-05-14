@@ -2,7 +2,13 @@ name: Lint
 
 on:
   push:
+    paths:
+      - "**.py"
+      - "**.pyi"
   pull_request:
+    paths:
+      - "**.py"
+      - "**.pyi"
   workflow_dispatch:
 
 jobs:
