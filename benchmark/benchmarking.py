@@ -1,12 +1,12 @@
 import gzip
 import inspect
+import itertools
 import json
 import math
 import time
 
 # noinspection PyPep8Naming
 from datetime import datetime as DateTime
-import itertools
 from pathlib import Path
 from types import FunctionType
 from typing import (
@@ -18,10 +18,7 @@ from typing import (
     Sequence,
     Optional,
     Generator,
-    Any,
 )
-
-import colorama
 
 from utils import *
 
@@ -127,7 +124,8 @@ class Benchmark:
                 self.id = mat.group("name")
             else:
                 raise SyntaxError(
-                    f'Benchmark id infer failed: only instantiation source line matching the regex "{pattern}" supports inferring.'
+                    f"Benchmark id infer failed: only instantiation source line "
+                    f'matching the regex "{pattern}" supports inferring.'
                 )
 
         Benchmark.instances.append(self)
@@ -458,7 +456,7 @@ class BenchmarkMetadata:
     def __init__(self):
         log("Getting metadata...")
         with indent_log():
-            import platform, cpuinfo, os
+            import platform, cpuinfo
 
             self.system = platform.system()
             log(f"System: {self.system}")

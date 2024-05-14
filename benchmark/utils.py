@@ -1,7 +1,7 @@
 import gc
-import os
 import inspect
 import itertools
+import os
 from contextlib import contextmanager
 
 # noinspection PyPep8Naming

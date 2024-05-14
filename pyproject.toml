@@ -67,5 +67,6 @@ archs = ["x86_64", "arm64"]
 [tool.black]
 preview = true
 enable-unstable-feature = [
-    "hug_parens_with_braces_and_square_brackets"
+    "hug_parens_with_braces_and_square_brackets",
+    "multiline_string_handling"
 ]
