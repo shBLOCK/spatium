@@ -29,7 +29,8 @@ __all__ = (
     "numerize",
     "log",
     "temp_log",
-    "indent_log"
+    "indent_log",
+    "CI"
 )
 
 TIMER = time.perf_counter_ns
@@ -225,10 +226,11 @@ class Benchmark:
             begin = time.perf_counter()
             with temp_log(), indent_log():
                 for i, cases in enumerate(permutations):
-                    with temp_log():
-                        log(f"Sequence[{i+1}/{len(permutations)}]: ", False)
-                        with NoGC:
-                            for _ in range(repeats):
+                    with NoGC:
+                        for rep in range(repeats):
+                            with temp_log():
+                                log(f"Sequence[{(i * repeats + rep + 1)}"
+                                    f"/{len(permutations) * repeats}]: ", False)
                                 for case in cases:
                                     result = case.run()
                                     result.sequence = cases
@@ -328,10 +330,10 @@ class TestCase:
         for self.number in auto_number_series():
             with temp_log():
                 log(numerize(self.number, decimals=1), False)
-                runtime = min(self.run().runtime for _ in range(5))
-                if runtime > AUTO_NUMBER_TARGET_TIME:
-                    return runtime
-                self.number = int(self.number * 1.1)
+                for _ in range(5):
+                    runtime = self.run().runtime
+                    if runtime > AUTO_NUMBER_TARGET_TIME:
+                        return runtime
 
     def run(self) -> "TestCaseResult":
         log(".", False)
@@ -535,6 +537,7 @@ def clear_env():
 
 def save_result(result: BenchmarkResult, file: Path):
     """Save the result and the current environment to a gzipped json file."""
+    file.parent.mkdir(parents=True, exist_ok=True)
     log(f"Saving to {file}...")
     with gzip.open(file, "wt", encoding="utf8") as f:
         json.dump(serialize(result), f, ensure_ascii=False)

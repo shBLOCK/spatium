@@ -10,3 +10,5 @@
 /src/spatium/_spatium.pyx
 /src/spatium/_spatium.pyi
 /codegen/output/*
+/benchmark/charts_local/
+/benchmark/results_local/

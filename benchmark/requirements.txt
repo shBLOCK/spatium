@@ -5,3 +5,4 @@ numerize
 psutil
 py-cpuinfo
 colorama
+PyGLM

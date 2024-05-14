@@ -46,6 +46,12 @@ def numpy():
     a = array((1.0, 2.0, 3.0), dtype=np.float64)
     b = array((3.0, 2.0, 1.0), dtype=np.float64)
 
+@Subject("PyGLM", color="tab:cyan", sort=25)
+def pyglm():
+    from glm import vec3
+    a = vec3(1, 2, 3)
+    b = vec3(3, 2, 1)
+
 
 instantiation = Benchmark("Instantiation")
 @instantiation(spatium, pure_python)
@@ -57,9 +63,12 @@ def pygame():
 @instantiation
 def numpy():
     array((1.0, 2.0, 3.0))
+@instantiation
+def pyglm():
+    vec3(1.0, 2.0, 3.0)
 
 copy = Benchmark("Copy")
-@copy(spatium, pure_python)
+@copy(spatium, pure_python, pyglm)
 def _():
     +a
 @copy(pygame, numpy)
@@ -83,19 +92,28 @@ def _():
 @dot(pygame, numpy)
 def _():
     a.dot(b)
+@dot.setup(pyglm)
+def _():
+    from glm import dot
+@dot
+def pyglm():
+    dot(a, b)
 
 cross = Benchmark("Cross Product")
-@dot(spatium, pure_python)
+@cross(spatium, pure_python)
 def _():
     a ^ b
-@dot
+@cross
 def pygame():
     a.cross(b)
-@dot.setup(numpy)
+@cross.setup(numpy)
 def _():
     cross = np.cross
-@dot
-def numpy():
+@cross.setup(pyglm)
+def _():
+    from glm import cross
+@cross(numpy, pyglm)
+def _():
     cross(a, b)
 
 equality = Benchmark("Equality")
@@ -115,6 +133,12 @@ def _():
 @length
 def pygame():
     a.length()
+@length.setup(pyglm)
+def _():
+    from glm import length
+@length
+def pyglm():
+    length(a)
 
 normalize = Benchmark("Normalize")
 @normalize(spatium, pure_python)
@@ -129,6 +153,12 @@ def _():
 @normalize
 def numpy():
     norm(a)
+@normalize.setup(pyglm)
+def _():
+    from glm import normalize
+@normalize
+def pyglm():
+    normalize(a)
 
 get_item = Benchmark("Get Item")
 @get_item
@@ -141,18 +171,18 @@ def _all_():
     a[1] = 4.0
 
 swizzle_get = Benchmark("Swizzle Get")
-@swizzle_get(spatium, pure_python, pygame)
+@swizzle_get(spatium, pure_python, pygame, pyglm)
 def _():
     a.zxy
 
 swizzle_set = Benchmark("Swizzle Set")
-@swizzle_set(spatium, pure_python, pygame)
+@swizzle_set(spatium, pure_python, pygame, pyglm)
 def _():
-    a.zxy
+    a.zxy = b
 
 
 result = run_benchmarks(
     order_permutations=True,
     min_runs_per_case=100
 )
-save_result(result, Path("results", result.datetime.strftime("%Y%m%d_%H-%M-%S") + ".dat"))
+save_result(result, Path("results" if CI else "results_local", result.datetime.strftime("%Y%m%d_%H-%M-%S") + ".dat"))
