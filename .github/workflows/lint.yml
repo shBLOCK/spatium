@@ -5,10 +5,12 @@ on:
     paths:
       - "**.py"
       - "**.pyi"
+      - ".github/workflows/lint.yml"
   pull_request:
     paths:
       - "**.py"
       - "**.pyi"
+      - ".github/workflows/lint.yml"
   workflow_dispatch:
 
 jobs:
