@@ -3,6 +3,7 @@ import os
 import inspect
 import itertools
 from contextlib import contextmanager
+
 # noinspection PyPep8Naming
 from datetime import datetime as DateTime
 from datetime import timezone
@@ -32,24 +33,28 @@ __all__ = (
     "indent_log",
     "temp_log",
     "iter_identity",
-    "auto_number_series"
+    "auto_number_series",
 )
 
 SourceLines = Tuple[str, ...]
+
 
 def auto_number_series() -> Generator[int, None, None]:
     for expo in itertools.count(2):
         # E12 series
         for value in (10, 12, 15, 18, 22, 27, 33, 39, 47, 56, 68, 82):
-            yield value * 10 ** expo
+            yield value * 10**expo
+
 
 def indent(src: SourceLines) -> SourceLines:
-    return tuple(" "*4 + line for line in src)
+    return tuple(" " * 4 + line for line in src)
+
 
 def dedent(src: SourceLines) -> SourceLines:
     for i in itertools.count():
-        if any(line[i:i+1] != " " for line in src):
+        if any(line[i : i + 1] != " " for line in src):
             return tuple(line[i:] for line in src)
+
 
 def extract_source(func: FunctionType) -> SourceLines:
     """
@@ -58,13 +63,15 @@ def extract_source(func: FunctionType) -> SourceLines:
     """
     src = inspect.getsource(func).splitlines()
     src = list(dedent(src))
-    if src[0][0] == "@": # delete decorator
+    if src[0][0] == "@":  # delete decorator
         del src[0]
-    del src[0] # delete function header
+    del src[0]  # delete function header
     return dedent(src)
+
 
 def compile_src(src: SourceLines, name: str = "<BENCHMARK_SRC>"):
     return compile("\n".join(src), name, "exec", optimize=2)
+
 
 def validate_source(src: SourceLines, name: str):
     try:
@@ -72,17 +79,21 @@ def validate_source(src: SourceLines, name: str):
     except Exception as e:
         raise RuntimeError("Code validation failed.") from e
 
+
 def extract_and_validate_source(func: FunctionType, name: str):
     src = extract_source(func)
     name += f"({func.__name__} in {func.__module__})"
     validate_source(src, name)
     return src
 
+
 def utc_now() -> DateTime:
     return DateTime.now(timezone.utc)
 
+
 def from_utc_stamp(stamp: float) -> DateTime:
     return DateTime.fromtimestamp(stamp, timezone.utc)
+
 
 class _NoGC:
     def __init__(self):
@@ -98,16 +109,22 @@ class _NoGC:
         if self._enter_depth == 0:
             gc.enable()
 
+
 NoGC = _NoGC()
 
 T = TypeVar("T")
+
+
 def _instance_from_id(cls: Type[T], identifier: str) -> Optional[T]:
     for inst in cls.instances:
         if inst.id == identifier:
             return inst
     return None
 
+
 _log_indent = 0
+
+
 @contextmanager
 def indent_log(n=1):
     global _log_indent
@@ -116,8 +133,11 @@ def indent_log(n=1):
     _log_indent -= n
     assert _log_indent >= 0
 
+
 _log_chrs_stack = []
 _log_temp_log = False
+
+
 @contextmanager
 def temp_log(disable=False):
     if disable:
@@ -134,7 +154,10 @@ def temp_log(disable=False):
     _should_indent = old_should_indent
     _log_temp_log = False
 
+
 _should_indent = True
+
+
 def log(msg="", new_line=True, color: str = None):
     if CI and _log_temp_log:
         return
@@ -152,6 +175,7 @@ def log(msg="", new_line=True, color: str = None):
         _log_chrs_stack[-1] += len(msg)
 
     _should_indent = new_line
+
 
 def iter_identity(it: Iterable[T]) -> Generator[T, None, None]:
     got = set()

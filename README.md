@@ -5,6 +5,7 @@
 <br>
 ![Language](https://img.shields.io/badge/Language-Cython-FEDF5B)
 ![Python Implementation](https://img.shields.io/pypi/implementation/spatium?label=Implementation)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 <br>
 [![Codegen](https://github.com/shBLOCK/spatium/actions/workflows/codegen.yml/badge.svg)](https://github.com/shBLOCK/spatium/actions/workflows/codegen.yml)
 [![Tests](https://github.com/shBLOCK/spatium/actions/workflows/tests.yml/badge.svg)](https://github.com/shBLOCK/spatium/actions/workflows/tests.yml)

@@ -3,12 +3,23 @@ import inspect
 import json
 import math
 import time
+
 # noinspection PyPep8Naming
 from datetime import datetime as DateTime
 import itertools
 from pathlib import Path
 from types import FunctionType
-from typing import Self, Callable, Dict, overload, Iterable, Sequence, Optional, Generator, Any
+from typing import (
+    Self,
+    Callable,
+    Dict,
+    overload,
+    Iterable,
+    Sequence,
+    Optional,
+    Generator,
+    Any,
+)
 
 import colorama
 
@@ -30,13 +41,14 @@ __all__ = (
     "log",
     "temp_log",
     "indent_log",
-    "CI"
+    "CI",
 )
 
 TIMER = time.perf_counter_ns
 BenchmarkFunc = Callable[[int, Callable[[], int]], int]
 AUTO_NUMBER_TARGET_TIME = 0.5e9
 # AUTO_NUMBER_TARGET_TIME = 0.005e9
+
 
 class Subject:
     """
@@ -45,10 +57,13 @@ class Subject:
     the decorated function will become the common setup procedure of this subject.
     (e.g. `from spatium import Vec3`)
     """
+
     instances: list["Subject"] = []
     get_instance = classmethod(_instance_from_id)
 
-    def __init__(self, name: str, *, color: str = None, identifier: str = None, sort: int = None):
+    def __init__(
+        self, name: str, *, color: str = None, identifier: str = None, sort: int = None
+    ):
         self.setup: SourceLines = None
         self.id: str = identifier
         self.name = name
@@ -59,8 +74,7 @@ class Subject:
     def __call__(self, setup: FunctionType) -> Self:
         self.id = setup.__name__
         self.setup = extract_and_validate_source(
-            setup,
-            f"<Subject {self.id} setup routine>"
+            setup, f"<Subject {self.id} setup routine>"
         )
         return self
 
@@ -73,7 +87,7 @@ class Subject:
             "name": self.name,
             "color": self.color,
             "setup": self.setup,
-            "sort": self.sort
+            "sort": self.sort,
         }
 
     @classmethod
@@ -82,16 +96,18 @@ class Subject:
             name=data["name"],
             color=data["color"],
             identifier=data["id"],
-            sort=data["sort"]
+            sort=data["sort"],
         )
         inst.setup = tuple(data["setup"])
         return inst
+
 
 class Benchmark:
     """
     Represents a benchmark, can have multiple test cases for multiple subject.
     Best be instantiated in a class as a class property, so that id can be automatically assigned.
     """
+
     instances: list["Benchmark"] = []
     get_instance = classmethod(_instance_from_id)
 
@@ -103,13 +119,16 @@ class Benchmark:
         if self.id is None:
             # infer id from call site
             import re
+
             line = inspect.stack()[1].code_context[0]
             pattern = r"\s*(?P<name>\w+)\s*=\s*Benchmark\s*\("
             mat = re.match(pattern, line)
             if mat is not None:
                 self.id = mat.group("name")
             else:
-                raise SyntaxError(f"Benchmark id infer failed: only instantiation source line matching the regex \"{pattern}\" supports inferring.")
+                raise SyntaxError(
+                    f'Benchmark id infer failed: only instantiation source line matching the regex "{pattern}" supports inferring.'
+                )
 
         Benchmark.instances.append(self)
 
@@ -127,10 +146,12 @@ class Benchmark:
     def setup(self, subject: Subject) -> Callable[[FunctionType], None]:
         """Function decorator. Set the setup routine of a test case."""
         self._check()
+
         def inner(func: FunctionType):
             case = self._get_or_create_case(subject)
             case.setup_src = extract_source(func)
             case.update()
+
         return inner
 
     @overload
@@ -144,8 +165,11 @@ class Benchmark:
 
         The setup routine must be set first if needed!
         """
+
     @overload
-    def __call__(self, *subjects: Subject, number: int = None) -> Callable[[FunctionType], None]:
+    def __call__(
+        self, *subjects: Subject, number: int = None
+    ) -> Callable[[FunctionType], None]:
         """
         Decorate a function to add test cases for multiple subjects.
         The decorator returns None.
@@ -175,8 +199,10 @@ class Benchmark:
             # is "@benchmark_name()" (not "@benchmark_name")
             if func is None:
                 if not all(c == "_" for c in i_func.__name__):
-                    raise NameError("Function name must only consist of underscores "
-                                    "if subjects are specified via arguments.")
+                    raise NameError(
+                        "Function name must only consist of underscores "
+                        "if subjects are specified via arguments."
+                    )
 
             for subject in subjects:
                 case = self._get_or_create_case(subject)
@@ -191,11 +217,13 @@ class Benchmark:
             return subjects[0]
         return inner
 
-    def run(self, order_permutations: bool = False, min_runs_per_case: int = 100) -> list["TestCaseResult"]:
+    def run(
+        self, order_permutations: bool = False, min_runs_per_case: int = 100
+    ) -> list["TestCaseResult"]:
         log(f"Benchmark - {self.id}:")
         with indent_log():
             all_results = []
-            results_by_subject = {s:[] for s in self.testcases.keys()}
+            results_by_subject = {s: [] for s in self.testcases.keys()}
             permutations: Sequence[Sequence[TestCase]]
             if order_permutations:
                 # noinspection PyTypeChecker
@@ -229,8 +257,11 @@ class Benchmark:
                     with NoGC:
                         for rep in range(repeats):
                             with temp_log():
-                                log(f"Sequence[{(i * repeats + rep + 1)}"
-                                    f"/{len(permutations) * repeats}]: ", False)
+                                log(
+                                    f"Sequence[{(i * repeats + rep + 1)}"
+                                    f"/{len(permutations) * repeats}]: ",
+                                    False,
+                                )
                                 for case in cases:
                                     result = case.run()
                                     result.sequence = cases
@@ -242,10 +273,12 @@ class Benchmark:
             with indent_log():
                 for subject, results in results_by_subject.items():
                     times = tuple(r.runtime for r in results)
-                    log(f"{subject.id}({len(results)} runs): "
+                    log(
+                        f"{subject.id}({len(results)} runs): "
                         f"Min {min(times)/1e9:.3f}s, "
                         f"Avg {sum(times)/len(times)/1e9:.3f}s, "
-                        f"Max {max(times)/1e9:.3f}s")
+                        f"Max {max(times)/1e9:.3f}s"
+                    )
 
         log()
 
@@ -258,15 +291,12 @@ class Benchmark:
         return {
             "id": self.id,
             "name": self.name,
-            "testcases": tuple(c.to_json() for c in self.testcases.values())
+            "testcases": tuple(c.to_json() for c in self.testcases.values()),
         }
 
     @classmethod
     def from_json(cls, data: Dict) -> Self:
-        inst = cls(
-            name=data["name"],
-            identifier=data["id"]
-        )
+        inst = cls(name=data["name"], identifier=data["id"])
         for case_dat in data["testcases"]:
             case = TestCase.from_json(case_dat)
             inst.testcases[case.subject] = case
@@ -294,14 +324,18 @@ class TestCase:
             "for _i in _it:",
         ))
         src.extend(indent(self.main_src))
-        src.extend((
-            "return _timer() - _begin",
-        ))
+        src.extend(("return _timer() - _begin",))
         src[1:] = indent(tuple(src[1:]))
 
         try:
             ls = {}
-            exec(compile_src(src, f"<Test case {self.subject.name} {self.benchmark.name}>"), {}, ls)
+            exec(
+                compile_src(
+                    src, f"<Test case {self.subject.name} {self.benchmark.name}>"
+                ),
+                {},
+                ls,
+            )
             self.benchmark_func = ls["_benchmark"]
         except Exception as e:
             raise RuntimeError("Benchmark function generation failed.") from e
@@ -315,15 +349,11 @@ class TestCase:
         name = f"<Test case {self.subject.name} {self.benchmark.name} %s routine>"
         if self.main_src is not None:
             validate_source(
-                self.subject.setup + self.setup_src + self.main_src,
-                name % "full"
+                self.subject.setup + self.setup_src + self.main_src, name % "full"
             )
             self._generate_benchmark_func()
         else:
-            validate_source(
-                self.subject.setup + self.setup_src,
-                name % "setup"
-            )
+            validate_source(self.subject.setup + self.setup_src, name % "setup")
 
     def auto_number(self) -> int:
         assert self.is_auto_number
@@ -341,22 +371,21 @@ class TestCase:
         assert self.number is not None, "Number of runs not set."
         datetime = utc_now()
         with NoGC:
-            return TestCaseResult(self, self.benchmark_func(self.number, TIMER), datetime)
+            return TestCaseResult(
+                self, self.benchmark_func(self.number, TIMER), datetime
+            )
 
     def __repr__(self):
         return f"<TestCase of {self.subject.id} in {self.benchmark.id}>"
 
     def to_json(self, id_only=False) -> Dict:
-        data = {
-            "benchmark_id": self.benchmark.id,
-            "subject_id": self.subject.id
-        }
+        data = {"benchmark_id": self.benchmark.id, "subject_id": self.subject.id}
         if not id_only:
             data.update({
                 "setup_src": self.setup_src,
                 "main_src": self.main_src,
                 "is_auto_number": self.is_auto_number,
-                "number": self.number
+                "number": self.number,
             })
         return data
 
@@ -370,7 +399,9 @@ class TestCase:
         if id_only:
             return benchmark.testcases[subject]
         else:
-            assert subject not in benchmark.testcases, f"TestCase of subject {subject} already exists in benchmark {benchmark}."
+            assert (
+                subject not in benchmark.testcases
+            ), f"TestCase of subject {subject} already exists in benchmark {benchmark}."
             inst = cls(benchmark, subject)
             inst.setup_src = tuple(data["setup_src"])
             inst.main_src = tuple(data["main_src"])
@@ -382,7 +413,13 @@ class TestCase:
 
 
 class TestCaseResult:
-    def __init__(self, testcase: TestCase, runtime: int, datetime: DateTime, sequence: Sequence[TestCase] = None):
+    def __init__(
+        self,
+        testcase: TestCase,
+        runtime: int,
+        datetime: DateTime,
+        sequence: Sequence[TestCase] = None,
+    ):
         self.testcase = testcase
         self.runtime = runtime
         self.datetime = datetime
@@ -396,8 +433,11 @@ class TestCaseResult:
             **self.testcase.to_json(id_only=True),
             "runtime": self.runtime,
             "timestamp": self.datetime.timestamp(),
-            "sequence": ([case.to_json(id_only=True) for case in self.sequence]
-                         if self.sequence is not None else None)
+            "sequence": (
+                [case.to_json(id_only=True) for case in self.sequence]
+                if self.sequence is not None
+                else None
+            ),
         }
 
     @classmethod
@@ -406,15 +446,20 @@ class TestCaseResult:
             testcase=TestCase.from_json(data, id_only=True),
             runtime=data["runtime"],
             datetime=from_utc_stamp(data["timestamp"]),
-            sequence=(tuple(TestCase.from_json(d, id_only=True) for d in data["sequence"])
-                      if data["sequence"] is not None else None)
+            sequence=(
+                tuple(TestCase.from_json(d, id_only=True) for d in data["sequence"])
+                if data["sequence"] is not None
+                else None
+            ),
         )
+
 
 class BenchmarkMetadata:
     def __init__(self):
         log("Getting metadata...")
         with indent_log():
             import platform, cpuinfo, os
+
             self.system = platform.system()
             log(f"System: {self.system}")
             self.ci = CI
@@ -444,7 +489,7 @@ class BenchmarkMetadata:
             "arch": self.arch,
             "cpu": self.cpu,
             "py_impl": self.py_impl,
-            "py_ver": self.py_ver
+            "py_ver": self.py_ver,
         }
 
     @classmethod
@@ -457,6 +502,7 @@ class BenchmarkMetadata:
         inst.py_impl = data["py_impl"]
         inst.py_ver = data["py_ver"]
         return inst
+
 
 class BenchmarkResult:
     def __init__(self, datetime: DateTime, metadata: BenchmarkMetadata = None):
@@ -471,7 +517,9 @@ class BenchmarkResult:
     def benchmarks(self) -> Iterable[Benchmark]:
         return iter_identity(r.testcase.benchmark for r in self.raw_results)
 
-    def get_results(self, *, testcase: TestCase = None, subject: Subject = None) -> Generator[TestCaseResult, None, None]:
+    def get_results(
+        self, *, testcase: TestCase = None, subject: Subject = None
+    ) -> Generator[TestCaseResult, None, None]:
         for result in self.raw_results:
             if testcase is not None and result.testcase != testcase:
                 continue
@@ -483,14 +531,14 @@ class BenchmarkResult:
         return {
             "timestamp": self.datetime.timestamp(),
             "metadata": self.metadata.to_json(),
-            "raw_results": tuple(r.to_json() for r in self.raw_results)
+            "raw_results": tuple(r.to_json() for r in self.raw_results),
         }
 
     @classmethod
     def from_json(cls, data: Dict) -> Self:
         inst = cls(
             datetime=from_utc_stamp(data["timestamp"]),
-            metadata=BenchmarkMetadata.from_json(data["metadata"])
+            metadata=BenchmarkMetadata.from_json(data["metadata"]),
         )
         inst.add_results(*(TestCaseResult.from_json(rd) for rd in data["raw_results"]))
         return inst
@@ -519,11 +567,14 @@ def serialize(result: BenchmarkResult) -> Dict:
     return {
         "subjects": tuple(s.to_json() for s in Subject.instances),
         "benchmarks": tuple(b.to_json() for b in Benchmark.instances),
-        "result": result.to_json()
+        "result": result.to_json(),
     }
 
+
 def deserialize(data: Dict) -> BenchmarkResult:
-    assert not Benchmark.instances or not Subject.instances, "Deserialization prohibited: environment not clean."
+    assert (
+        not Benchmark.instances or not Subject.instances
+    ), "Deserialization prohibited: environment not clean."
 
     for d in data["subjects"]:
         Subject.from_json(d)
@@ -531,9 +582,11 @@ def deserialize(data: Dict) -> BenchmarkResult:
         Benchmark.from_json(d)
     return BenchmarkResult.from_json(data["result"])
 
+
 def clear_env():
     Benchmark.instances.clear()
     Subject.instances.clear()
+
 
 def save_result(result: BenchmarkResult, file: Path):
     """Save the result and the current environment to a gzipped json file."""
@@ -541,6 +594,7 @@ def save_result(result: BenchmarkResult, file: Path):
     log(f"Saving to {file}...")
     with gzip.open(file, "wt", encoding="utf8") as f:
         json.dump(serialize(result), f, ensure_ascii=False)
+
 
 def load_result(file: Path) -> BenchmarkResult:
     """Restore the result and the environment from a gzipped json file."""

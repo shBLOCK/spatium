@@ -89,9 +89,16 @@ def from_template(template: str, params: dict[str, Any] = None, _globals=None) -
             if "<GEN>:" in line:
                 gen_pos = line.index("#<GEN>:")
                 prefix = line[:gen_pos]
-                expr = line[gen_pos + 7:]
+                expr = line[gen_pos + 7 :]
                 try:
-                    result = eval(expr, globals() if _globals is None else globals().copy().update(_globals))
+                    result = eval(
+                        expr,
+                        (
+                            globals()
+                            if _globals is None
+                            else globals().copy().update(_globals)
+                        ),
+                    )
                     generated = True
                 except Exception as e:
                     if isinstance(e, AssertionError):
@@ -138,6 +145,7 @@ class _Func:
             case _:
                 self.ret = c_ret
 
+
 class _Overload:
     def __init__(self, name: str):
         self.name = name
@@ -146,8 +154,9 @@ class _Overload:
 
     def add(self, func: _Func):
         if len(self._funcs) > 0:
-            assert (Self in self._funcs[0].params) == (Self in func.params), \
-                "function/method mismatch"
+            assert (Self in self._funcs[0].params) == (
+                Self in func.params
+            ), "function/method mismatch"
         self._funcs.append(func)
         self._possible_param_types_cache = None
 
@@ -181,10 +190,12 @@ class _Overload:
                     if p not in self._possible_param_types_cache[i]:
                         self._possible_param_types_cache[i].append(p)
 
-        for optional_param in self._possible_param_types_cache[self.min_params:]:
+        for optional_param in self._possible_param_types_cache[self.min_params :]:
             optional_param.append(None)
 
-        self._possible_param_types_cache = tuple(tuple(ts) for ts in self._possible_param_types_cache)
+        self._possible_param_types_cache = tuple(
+            tuple(ts) for ts in self._possible_param_types_cache
+        )
 
         return self._possible_param_types_cache
 
@@ -204,19 +215,19 @@ class _Overload:
 
     @staticmethod
     def _type_check_expression(*types):
-        if float in types and int in types: # py_float
+        if float in types and int in types:  # py_float
             assert len(types) == 2, "py_float type should be a discrete branch!"
             # Insignificant optimization
             # return "(PyFloat_CheckExact({value}) or PyLong_CheckExact({value}))"
             return "(PyFloat_Check({value}) or PyLong_Check({value}))"
-        elif int in types: # py_int
+        elif int in types:  # py_int
             assert len(types) == 1, "py_int type should be a discrete branch!"
             # Insignificant optimization
             # return "PyLong_CheckExact({value})"
             return "PyLong_Check({value})"
         else:
             out = ""
-            for i,t in enumerate(types):
+            for i, t in enumerate(types):
                 if type(t) is str:
                     out += f"isinstance({{value}}, {t})"
                 elif t is None:
@@ -269,29 +280,35 @@ class _Overload:
                 type_strs.append(self._type_str(pts[0]))
             else:
                 type_strs.append(f"({' | '.join(map(self._type_str, pts))})")
-        text = (f"raise TypeError(\"No matching overload function for parameter types: "
-                f"{', '.join(type_strs)}")
+        text = (
+            f'raise TypeError("No matching overload function for parameter types: '
+            f"{', '.join(type_strs)}"
+        )
         if len(param_types) != self.max_params:
             text += ", ..."
-        text += "\")"
+        text += '")'
         return text
 
     def _gen_type_cast(self, var_name: str, var_types: tuple):
         multiple_type_err = "A branch should have only one general(cast-able) type!"
-        if float in var_types and int in var_types: # py_float
+        if float in var_types and int in var_types:  # py_float
             assert len(var_types) == 2, multiple_type_err
             # Insignificant optimization
             # return f"PyFloat_AS_DOUBLE({var_name}) if PyFloat_CheckExact({var_name}) else PyLong_AsDouble({var_name})"
             return f"PyFloat_AsDouble({var_name})"
-        elif int in var_types: # py_int
+        elif int in var_types:  # py_int
             assert len(var_types) == 1, multiple_type_err
             return f"PyLong_AsLongLong({var_name})"
         else:
             assert len(var_types) == 1, multiple_type_err
-            assert isinstance(var_types[0], str), f"Don't know how to cast to {var_types[0]}."
+            assert isinstance(
+                var_types[0], str
+            ), f"Don't know how to cast to {var_types[0]}."
             return f"<{var_types[0]}> {var_name}"
 
-    def _gen_dispatch_tree(self, params_types: tuple = None) -> tuple[Sequence[str], bool]:
+    def _gen_dispatch_tree(
+        self, params_types: tuple = None
+    ) -> tuple[Sequence[str], bool]:
         """Generate overload dispatch tree recursively."""
         if params_types is None:
             params_types = ((Self,),) if self._funcs[0].params[0] is Self else ()
@@ -302,12 +319,16 @@ class _Overload:
             if len(funcs) == 0:
                 return [self._gen_type_no_match_exception(params_types)], False
             if len(funcs) > 1:
-                assert False, f"Multiple matching functions for: {', '.join(str(p) for p in params_first_types)}"
+                assert (
+                    False
+                ), f"Multiple matching functions for: {', '.join(str(p) for p in params_first_types)}"
             func = funcs[0]
 
-            out = [f"{'self.' if self.is_method else ''}"
-                   f"{func.name}"
-                   f"({', '.join(self._gen_type_cast(pn, pts) for pts,pn in zip(params_types, self.param_names) if pn != 'self' and None not in pts)})"]
+            out = [
+                f"{'self.' if self.is_method else ''}"
+                f"{func.name}"
+                f"({', '.join(self._gen_type_cast(pn, pts) for pts,pn in zip(params_types, self.param_names) if pn != 'self' and None not in pts)})"
+            ]
             if func.ret is None:
                 out.append("return")
             else:
@@ -326,7 +347,9 @@ class _Overload:
                 if len(matches) == 0:
                     continue
                 for branch in branches:
-                    if set(matches) == set(self._func_from_params(params_first_types + (branch[0],))):
+                    if set(matches) == set(
+                        self._func_from_params(params_first_types + (branch[0],))
+                    ):
                         branch.append(t)
                         break
                 else:
@@ -337,8 +360,10 @@ class _Overload:
 
             any_hit = False
             for i, t in enumerate(branches):
-                out.append(f"{'if' if i == 0 else 'elif'} "
-                           f"{self._type_check_expression(*t).format(value=self.param_names[len(params_types)])}:")
+                out.append(
+                    f"{'if' if i == 0 else 'elif'} "
+                    f"{self._type_check_expression(*t).format(value=self.param_names[len(params_types)])}:"
+                )
                 branch_params = params_types + (t,)
                 dt, hit = self._gen_dispatch_tree(branch_params)
                 if hit:
@@ -347,12 +372,16 @@ class _Overload:
                     for l in dt:
                         out.append(f"    {l}")
                 else:
-                    out.append("    " + self._gen_type_no_match_exception(branch_params))
+                    out.append(
+                        "    " + self._gen_type_no_match_exception(branch_params)
+                    )
             out.append("else:")
             expected_type_strs = [self._type_str(t) for t in possible_types]
             expected_types_str = " | ".join(expected_type_strs)
-            out.append(f"    raise TypeError(f\"The {len(params_first_types) + 1}th parameter expected {expected_types_str}, "
-                       f"got {{{self.param_names[len(params_first_types)]}}}\")")
+            out.append(
+                f'    raise TypeError(f"The {len(params_first_types) + 1}th parameter expected {expected_types_str}, '
+                f'got {{{self.param_names[len(params_first_types)]}}}")'
+            )
 
             return out, any_hit
 
@@ -370,10 +399,13 @@ class _Overload:
 
         ret_types = list(set(_Overload._type_str(f.ret) for f in self._funcs))
 
-        lines = [f"def {self.name}({', '.join(('object ' if i > 0 else '') + p for i,p in enumerate(param_strs))}, /) -> {' | '.join(ret_types)}:"]
+        lines = [
+            f"def {self.name}({', '.join(('object ' if i > 0 else '') + p for i,p in enumerate(param_strs))}, /) -> {' | '.join(ret_types)}:"
+        ]
         disp_lines, _ = self._gen_dispatch_tree()
         lines += [f"    {dl}" for dl in disp_lines]
         return lines
+
 
 def process_overloads(file: str) -> str:
     import regex
@@ -398,7 +430,7 @@ def process_overloads(file: str) -> str:
                 r"\("
                 r"\s*(?:(?P<params>\w+\s+\w+|self)(?:\s*,\s*(?P<params>\w+\s+\w+))*)?\s*"
                 r"\)",
-                line
+                line,
             )
             assert m is not None, line
             name = m.group("name")
@@ -410,7 +442,7 @@ def process_overloads(file: str) -> str:
             overload = overloads[name]
             new_name = f"_{name}_{len(overload):d}"
             name_span = m.span("name")
-            lines[i] = line[:name_span[0]] + new_name + line[name_span[1]:]
+            lines[i] = line[: name_span[0]] + new_name + line[name_span[1] :]
             overload.add(_Func(new_name, c_params, c_ret))
 
     lines = [line for line in lines if "<OVERLOAD>" not in line]
@@ -418,14 +450,17 @@ def process_overloads(file: str) -> str:
     while True:
         for i, line in enumerate(lines):
             if "<OVERLOAD_DISPATCHER>:" in line:
-                m = regex.match(r"(?P<prefix>\s*)#(?:\s|#)*<OVERLOAD_DISPATCHER>:(?P<name>\w+)", line)
+                m = regex.match(
+                    r"(?P<prefix>\s*)#(?:\s|#)*<OVERLOAD_DISPATCHER>:(?P<name>\w+)",
+                    line,
+                )
                 assert m is not None
                 prefix = m.group("prefix")
                 name = m.group("name")
                 assert name in overloads
                 disp_lines = overloads[name].gen_dispatcher()
                 disp_lines = [prefix + disp_line for disp_line in disp_lines]
-                lines[i:i + 1] = disp_lines
+                lines[i : i + 1] = disp_lines
                 break
         else:
             break
@@ -433,16 +468,23 @@ def process_overloads(file: str) -> str:
     return "".join(f"{line}\n" for line in lines)
 
 
-def step_generate(template_file: str, output_file: str = None, write_file: bool = False, params: dict = None, _globals: dict = None, overload: bool = False):
+def step_generate(
+    template_file: str,
+    output_file: str = None,
+    write_file: bool = False,
+    params: dict = None,
+    _globals: dict = None,
+    overload: bool = False,
+):
     print(f"Step Generate: {template_file}")
 
     if output_file is None:
         output_file = template_file
 
     import os
+
     if not os.path.exists("output"):
         os.mkdir("output")
-
 
     template = open(f"templates/{template_file}", encoding="utf8").read()
     t = time.perf_counter()
@@ -469,10 +511,13 @@ def step_generate(template_file: str, output_file: str = None, write_file: bool 
 
 def step_gen_stub(source_file: str, output_file: str):
     import stub_generator
+
     source = open(f"output/{source_file}", encoding="utf8").read()
     t = time.perf_counter()
     result = stub_generator.gen_stub(source)
-    print(f"Step Gen Stub: {source_file} -> {output_file} completed in {time.perf_counter() - t:.3f}s")
+    print(
+        f"Step Gen Stub: {source_file} -> {output_file} completed in {time.perf_counter() - t:.3f}s"
+    )
     with open(f"output/{output_file}", "w", encoding="utf8") as output:
         output.write(result)
 
@@ -482,17 +527,16 @@ def step_cythonize(file: str):
     import subprocess
 
     print("########## Cythonize ##########")
-    proc = subprocess.Popen((
-        "cythonize.exe",
-        "-a",
-        "-i",
-        f"output/{file}.pyx"
-    ), stdout=sys.stdout, stderr=sys.stderr)
+    proc = subprocess.Popen(
+        ("cythonize.exe", "-a", "-i", f"output/{file}.pyx"),
+        stdout=sys.stdout,
+        stderr=sys.stderr,
+    )
     t = time.perf_counter()
     proc.wait()
     print(
         f"Cythonize finished in {time.perf_counter() - t}s with exit code {proc.returncode}",
-        file=sys.stdout if proc.returncode == 0 else sys.stderr
+        file=sys.stdout if proc.returncode == 0 else sys.stderr,
     )
 
 
@@ -506,4 +550,3 @@ def step_move_to_dest(final_dest: str, file_prefix: str, file_suffix: str):
             dest = os.path.join(final_dest, file)
             shutil.copy(path, dest)
             print(f"Coping {file} to {dest}")
-

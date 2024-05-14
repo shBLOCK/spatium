@@ -21,17 +21,9 @@ class Vec3:
 
     def __add__(self, other: Union["Vec3", float]):
         if isinstance(other, Vec3):
-            return Vec3(
-                self.x + other.x,
-                self.y + other.y,
-                self.z + other.z
-            )
+            return Vec3(self.x + other.x, self.y + other.y, self.z + other.z)
         elif isinstance(other, float | int):
-            return Vec3(
-                self.x + other,
-                self.y + other,
-                self.z + other
-            )
+            return Vec3(self.x + other, self.y + other, self.z + other)
         else:
             raise TypeError()
 
@@ -59,7 +51,7 @@ class Vec3:
             return Vec3(
                 self.y * other.z - self.z * other.y,
                 self.z * other.x - self.x * other.z,
-                self.x * other.y - self.y * other.x
+                self.x * other.y - self.y * other.x,
             )
         else:
             raise TypeError()

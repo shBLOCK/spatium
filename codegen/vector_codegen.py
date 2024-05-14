@@ -65,7 +65,9 @@ def gen_combination_constructors(dims: int, vtype: Type) -> str:
         # Generate params
         self_dim = 0
         for in_dims in combination:
-            param_types.append(f"{get_c_type(vtype) if in_dims == 1 else get_vec_class_name(in_dims, vtype)}")
+            param_types.append(
+                f"{get_c_type(vtype) if in_dims == 1 else get_vec_class_name(in_dims, vtype)}"
+            )
             param_name = ""
             for in_dim in range(in_dims):
                 param_name += DIMS[self_dim]
@@ -79,12 +81,16 @@ def gen_combination_constructors(dims: int, vtype: Type) -> str:
                 if in_dims == 1:
                     assigns.append(f"self.{DIMS[self_dim]} = {param_name}")
                 else:
-                    assigns.append(f"self.{DIMS[self_dim]} = {param_name}.{DIMS[in_dim]}")
+                    assigns.append(
+                        f"self.{DIMS[self_dim]} = {param_name}.{DIMS[in_dim]}"
+                    )
                 self_dim += 1
 
         func = "#<OVERLOAD>\n"
-        func += (f"cdef inline void __init__(self, "
-                 f"{', '.join(f'{t} {n}' for t, n in zip(param_types, param_names))}) noexcept:\n")
+        func += (
+            f"cdef inline void __init__(self, "
+            f"{', '.join(f'{t} {n}' for t, n in zip(param_types, param_names))}) noexcept:\n"
+        )
 
         docstring = f"Create a {dims}D vector from "
         for i, param_dims in enumerate(combination):
@@ -156,7 +162,9 @@ def _gen_swizzle_get(swizzle: str, vtype: Type) -> str:
 
 def _gen_swizzle_set(swizzle: str, vtype: Type):
     out = f"@{swizzle}.setter\n"
-    out += f"def {swizzle}(self, {get_vec_class_name(len(swizzle), vtype)} vec) -> None:\n"
+    out += (
+        f"def {swizzle}(self, {get_vec_class_name(len(swizzle), vtype)} vec) -> None:\n"
+    )
 
     docstring = f"Set the value of the {', '.join(swizzle.upper())}"
     docstring = docstring[:-3] + " and " + docstring[-1]
@@ -196,10 +204,7 @@ def gen_swizzle_properties(dims: int, vtype: Type) -> str:
 def gen_for_each_dim(template: str, dims: int, join="\n") -> str:
     out = ""
     for i, dim in enumerate(range(dims)):
-        out += template.format_map({
-            "dim": DIMS[dim],
-            "index": i
-        })
+        out += template.format_map({"dim": DIMS[dim], "index": i})
         if dim != dims - 1:
             out += join
     return out
@@ -216,8 +221,13 @@ def gen_repr(dims: int, vtype: Type) -> str:
     out += ')"'
     return out
 
+
 def gen_common_binary_and_inplace_op(op: str, name: str, readable_name: str) -> str:
-    return from_template(open("templates/common_binary_and_inplace_op.pyx").read(), {"Op": op, "OpName": name, "OpReadableName": readable_name})
+    return from_template(
+        open("templates/common_binary_and_inplace_op.pyx").read(),
+        {"Op": op, "OpName": name, "OpReadableName": readable_name},
+    )
+
 
 def gen_item_op(dims: int, op: str) -> str:
     out = ""
@@ -226,8 +236,9 @@ def gen_item_op(dims: int, op: str) -> str:
         out += f"key == {dim}:\n"
         out += f"    {op.format(dim=DIMS[dim])}\n"
     out += "else:\n"
-    out += "    raise KeyError(f\"_VecClassName_ index out of range: {key}\")"
+    out += '    raise KeyError(f"_VecClassName_ index out of range: {key}")'
     return out
+
 
 def gen_iterator_next(dims: int) -> str:
     out = ""

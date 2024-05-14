@@ -1,3 +1,4 @@
+# fmt: off
 # begin: noinspection PyUnresolvedReferences
 # begin: noinspection PyUnusedLocal
 # begin: noinspection PyUnboundLocalVariable

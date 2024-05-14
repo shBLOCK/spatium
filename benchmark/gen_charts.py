@@ -11,7 +11,9 @@ CHARTS.mkdir(parents=True, exist_ok=True)
 
 files = [Path(f) for f in os.listdir(RESULTS) if f.endswith(".dat")]
 # Latest to earliest
-files.sort(reverse=True, key=lambda f: datetime.datetime.strptime(f.stem, "%Y%m%d_%H-%M-%S"))
+files.sort(
+    reverse=True, key=lambda f: datetime.datetime.strptime(f.stem, "%Y%m%d_%H-%M-%S")
+)
 
 for file in files:
     log(f"{file}:")
@@ -27,9 +29,8 @@ for file in files:
                 f"{result.metadata.py_impl} {result.metadata.py_ver} · "
                 f"{result.metadata.system} · "
                 f"{result.metadata.cpu}"
-                + ("  (GitHub Actions)" if result.metadata.ci else "")
-                ,
-            )
+                + ("  (GitHub Actions)" if result.metadata.ci else ""),
+            ),
         )
         chart.savefig(CHARTS / file.with_suffix(".svg"))
         clear_env()
@@ -45,4 +46,6 @@ with open(CHARTS / "README.md", "w") as f:
     f.write("---\n")
     f.write("\n")
     for file in files:
-        f.write(f"[![{file.stem}](./{file.with_suffix(".svg")})](./{file.with_suffix(".svg")})\n")
+        f.write(
+            f"[![{file.stem}](./{file.with_suffix(".svg")})](./{file.with_suffix(".svg")})\n"
+        )

@@ -63,3 +63,9 @@ archs = ["x86_64", "i686"]
 
 [tool.cibuildwheel.macos]
 archs = ["x86_64", "arm64"]
+
+[tool.black]
+preview = true
+enable-unstable-feature = [
+    "hug_parens_with_braces_and_square_brackets"
+]

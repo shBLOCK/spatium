@@ -13,8 +13,7 @@ setup(
         ),
     ],
     packages=find_packages(
-        where="src",
-        exclude=["tests", "spatium/*.c", "spatium/*.cpp"]
+        where="src", exclude=["tests", "spatium/*.c", "spatium/*.cpp"]
     ),
-    package_dir={'': 'src'},
+    package_dir={"": "src"},
 )
