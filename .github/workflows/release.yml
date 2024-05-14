@@ -173,7 +173,7 @@ jobs:
           path: src/spatium
 
       - name: CIBuildWheel
-        uses: pypa/cibuildwheel@v2.17.0
+        uses: pypa/cibuildwheel@v2.18.0
         with:
           output-dir: dist
         env:
