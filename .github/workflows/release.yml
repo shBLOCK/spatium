@@ -149,7 +149,7 @@ jobs:
 
       - name: Fail-Fast
         if: failure()
-        uses: andymckay/cancel-action@0.4
+        uses: andymckay/cancel-action@0.5
 
   binary_dists:
     name: Binary Dists
@@ -188,7 +188,7 @@ jobs:
 
       - name: Fail-Fast
         if: failure()
-        uses: andymckay/cancel-action@0.4
+        uses: andymckay/cancel-action@0.5
 
   github_release:
     name: GitHub Release
@@ -252,7 +252,7 @@ jobs:
 
       - name: Fail-Fast
         if: failure()
-        uses: andymckay/cancel-action@0.4
+        uses: andymckay/cancel-action@0.5
 
   pypi_upload:
     name: PyPI Upload
@@ -283,4 +283,4 @@ jobs:
 
       - name: Fail-Fast
         if: failure()
-        uses: andymckay/cancel-action@0.4
+        uses: andymckay/cancel-action@0.5
